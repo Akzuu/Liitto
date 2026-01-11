@@ -1,3 +1,3 @@
 # Liitto
 
-Wedding invitation platform.
+Wedding invitation platform built with Next.js, Payload CMS, and PostgreSQL.

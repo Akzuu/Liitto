@@ -38,10 +38,10 @@ export const Users: CollectionConfig = {
 			name: 'tenant',
 			type: 'relationship',
 			relationTo: 'tenants',
-			required: true,
+			required: false, // Allow first user without tenant
 			hasMany: false,
 			admin: {
-				description: 'The wedding this user belongs to',
+				description: 'The wedding this user belongs to (optional for first admin)',
 			},
 		},
 		{

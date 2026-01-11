@@ -20,6 +20,7 @@ Liitto is a wedding invitation platform built as a **pnpm + Turborepo monorepo**
 - **Database**: PostgreSQL (connection via `DATABASE_URL` in .env.local)
 - **Authentication**: Payload Auth (unified for admins and guests)
 - **UI Library**: HeroUI (`@heroui/react`) with Framer Motion
+  - **IMPORTANT**: Always consult the HeroUI MCP server (configured in `.vscode/mcp.json`) before using HeroUI components to verify correct API, props, and available exports
 - **Images**: Sharp for optimization, local uploads to `public/uploads/`
 - **Maps**: React-Leaflet with OpenStreetMap
 - **QR Codes**: qrcode library for invitation generation
