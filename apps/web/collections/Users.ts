@@ -1,5 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
+// Generate random 4-digit PIN
+const generatePIN = (): string => {
+	return Math.floor(1000 + Math.random() * 9000).toString()
+}
+
 export const Users: CollectionConfig = {
 	slug: 'users',
 	auth: {
@@ -11,7 +16,7 @@ export const Users: CollectionConfig = {
 	},
 	admin: {
 		useAsTitle: 'fullName',
-		defaultColumns: ['fullName', 'email', 'role', 'tenant'],
+		defaultColumns: ['fullName', 'email', 'role', 'wedding'],
 	},
 	access: {
 		read: ({ req }) => {
@@ -35,13 +40,13 @@ export const Users: CollectionConfig = {
 	},
 	fields: [
 		{
-			name: 'tenant',
+			name: 'wedding',
 			type: 'relationship',
-			relationTo: 'tenants',
-			required: false, // Allow first user without tenant
+			relationTo: 'weddings',
+			required: false, // Allow first super admin without wedding
 			hasMany: false,
 			admin: {
-				description: 'The wedding this user belongs to (optional for first admin)',
+				description: 'The wedding this user belongs to (optional for super admin)',
 			},
 		},
 		{
@@ -60,7 +65,7 @@ export const Users: CollectionConfig = {
 			required: true,
 			defaultValue: 'guest',
 			admin: {
-				description: 'Admin: Full access | Guest: Can only RSVP',
+				description: 'Admin: Super admin or wedding admin | Guest: Invited guest with PIN login',
 			},
 		},
 		{
@@ -76,8 +81,9 @@ export const Users: CollectionConfig = {
 			name: 'email',
 			type: 'email',
 			label: 'Email',
+			required: false,
 			admin: {
-				description: 'Optional for guests, required for admins',
+				description: 'Required for admins. Guests provide email when they RSVP.',
 			},
 		},
 		{
@@ -85,31 +91,75 @@ export const Users: CollectionConfig = {
 			type: 'text',
 			label: '4-Digit PIN',
 			admin: {
-				description: 'For guest authentication (will be hashed)',
+				description: 'Auto-generated PIN for guest login. Share this with the guest.',
 				condition: (data) => data.role === 'guest',
+				readOnly: true,
 			},
 			minLength: 4,
 			maxLength: 4,
-		},
-		{
-			name: 'familyGroup',
-			type: 'text',
-			label: 'Family Group',
-			admin: {
-				description: 'Group name for family members sharing login',
-				condition: (data) => data.role === 'guest',
+			hooks: {
+				beforeChange: [
+					({ data, operation, value }) => {
+						// Auto-generate PIN for new guests
+						if (operation === 'create' && data?.role === 'guest' && !value) {
+							return generatePIN()
+						}
+						return value
+					},
+				],
 			},
 		},
 		{
-			name: 'allowedGuestCount',
+			name: 'allowedPlusOnes',
 			type: 'number',
-			label: 'Allowed Guest Count',
+			label: 'Allowed Plus Ones',
+			defaultValue: 0,
+			min: 0,
 			admin: {
-				description: 'Total number of people allowed (including primary guest)',
+				description: 'Number of additional guests this person can bring (0 = just them)',
 				condition: (data) => data.role === 'guest',
 			},
-			min: 1,
-			defaultValue: 1,
+		},
+		{
+			name: 'isPrimaryContact',
+			type: 'checkbox',
+			label: 'Primary Contact',
+			defaultValue: true,
+			admin: {
+				description: 'Is this person the main contact who will fill RSVP?',
+				condition: (data) => data.role === 'guest',
+			},
+		},
+		{
+			name: 'invitationSentDate',
+			type: 'date',
+			label: 'Invitation Sent Date',
+			admin: {
+				date: {
+					pickerAppearance: 'dayOnly',
+				},
+				description: 'When the invitation was sent to this guest',
+				condition: (data) => data.role === 'guest',
+			},
+		},
+		{
+			name: 'qrCode',
+			type: 'textarea',
+			label: 'QR Code Data',
+			admin: {
+				description: 'Generated QR code data URL or identifier',
+				readOnly: true,
+				condition: (data) => data.role === 'guest',
+			},
+		},
+		{
+			name: 'notes',
+			type: 'textarea',
+			label: 'Internal Notes',
+			admin: {
+				description: 'Private notes about this guest (not visible to guest)',
+				condition: (data) => data.role === 'guest',
+			},
 		},
 	],
 }

@@ -67,12 +67,8 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    tenants: Tenant;
+    weddings: Wedding;
     users: User;
-    'wedding-info': WeddingInfo;
-    media: Media;
-    gallery: Gallery;
-    guests: Guest;
     'rsvp-responses': RsvpResponse;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,12 +77,8 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    tenants: TenantsSelect<false> | TenantsSelect<true>;
+    weddings: WeddingsSelect<false> | WeddingsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'wedding-info': WeddingInfoSelect<false> | WeddingInfoSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    gallery: GallerySelect<false> | GallerySelect<true>;
-    guests: GuestsSelect<false> | GuestsSelect<true>;
     'rsvp-responses': RsvpResponsesSelect<false> | RsvpResponsesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -128,9 +120,9 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants".
+ * via the `definition` "weddings".
  */
-export interface Tenant {
+export interface Wedding {
   id: number;
   /**
    * e.g., "Emma & John"
@@ -149,72 +141,6 @@ export interface Tenant {
    * Deactivate to disable this wedding site
    */
   isActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  /**
-   * The wedding this user belongs to (optional for first admin)
-   */
-  tenant?: (number | null) | Tenant;
-  /**
-   * Admin: Full access | Guest: Can only RSVP
-   */
-  role: 'admin' | 'guest';
-  /**
-   * Used as username for guest login
-   */
-  fullName: string;
-  /**
-   * For guest authentication (will be hashed)
-   */
-  pin?: string | null;
-  /**
-   * Group name for family members sharing login
-   */
-  familyGroup?: string | null;
-  /**
-   * Total number of people allowed (including primary guest)
-   */
-  allowedGuestCount?: number | null;
-  updatedAt: string;
-  createdAt: string;
-  /**
-   * Optional for guests, required for admins
-   */
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "wedding-info".
- */
-export interface WeddingInfo {
-  id: number;
-  /**
-   * The wedding this information belongs to
-   */
-  tenant: number | Tenant;
-  title: string;
-  ceremonyDateTime: string;
   venueName: string;
   venueAddress: string;
   /**
@@ -224,50 +150,6 @@ export interface WeddingInfo {
     latitude: number;
     longitude: number;
   };
-  /**
-   * e.g., "Our Story" or "How We Met"
-   */
-  storyTitle?: string | null;
-  /**
-   * Your love story or how you met
-   */
-  storyContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Any extra details for guests
-   */
-  additionalInfo?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * e.g., "Formal", "Cocktail", "Beach Casual"
-   */
-  dresscode?: string | null;
   /**
    * Timeline of events during the wedding day
    */
@@ -291,118 +173,34 @@ export interface WeddingInfo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "users".
  */
-export interface Media {
+export interface User {
   id: number;
   /**
-   * The wedding this media belongs to
+   * The wedding this user belongs to (optional for super admin)
    */
-  tenant: number | Tenant;
+  wedding?: (number | null) | Wedding;
   /**
-   * Description of the image for accessibility
+   * Admin: Super admin or wedding admin | Guest: Invited guest with PIN login
    */
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    hero?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery".
- */
-export interface Gallery {
-  id: number;
+  role: 'admin' | 'guest';
   /**
-   * The wedding this gallery belongs to
+   * Used as username for guest login
    */
-  tenant: number | Tenant;
-  /**
-   * e.g., "Engagement Photos", "Pre-Wedding"
-   */
-  title: string;
-  /**
-   * Optional description of this gallery
-   */
-  description?: string | null;
-  images?:
-    | {
-        image: number | Media;
-        /**
-         * Optional caption for this image
-         */
-        caption?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Uncheck to hide this gallery from guests
-   */
-  isPublished?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "guests".
- */
-export interface Guest {
-  id: number;
-  /**
-   * The wedding this guest is invited to
-   */
-  tenant: number | Tenant;
-  /**
-   * Link to the user account for this guest
-   */
-  user: number | User;
   fullName: string;
   /**
-   * Group name for family members (e.g., "Smith Family")
+   * Auto-generated PIN for guest login. Share this with the guest.
    */
-  familyGroup: string;
-  /**
-   * Is this person the main contact who will fill RSVP?
-   */
-  isPrimaryContact?: boolean | null;
+  pin?: string | null;
   /**
    * Number of additional guests this person can bring (0 = just them)
    */
   allowedPlusOnes?: number | null;
+  /**
+   * Is this person the main contact who will fill RSVP?
+   */
+  isPrimaryContact?: boolean | null;
   /**
    * When the invitation was sent to this guest
    */
@@ -417,6 +215,24 @@ export interface Guest {
   notes?: string | null;
   updatedAt: string;
   createdAt: string;
+  /**
+   * Required for admins. Guests provide email when they RSVP.
+   */
+  email?: string | null;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -427,11 +243,11 @@ export interface RsvpResponse {
   /**
    * The wedding this RSVP is for
    */
-  tenant: number | Tenant;
+  wedding: number | Wedding;
   /**
    * The guest who submitted this RSVP
    */
-  guest: number | Guest;
+  guest: number | User;
   /**
    * Name of the person who submitted (for easy reference)
    */
@@ -498,28 +314,12 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'tenants';
-        value: number | Tenant;
+        relationTo: 'weddings';
+        value: number | Wedding;
       } | null)
     | ({
         relationTo: 'users';
         value: number | User;
-      } | null)
-    | ({
-        relationTo: 'wedding-info';
-        value: number | WeddingInfo;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
-      } | null)
-    | ({
-        relationTo: 'gallery';
-        value: number | Gallery;
-      } | null)
-    | ({
-        relationTo: 'guests';
-        value: number | Guest;
       } | null)
     | ({
         relationTo: 'rsvp-responses';
@@ -569,14 +369,23 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants_select".
+ * via the `definition` "weddings_select".
  */
-export interface TenantsSelect<T extends boolean = true> {
+export interface WeddingsSelect<T extends boolean = true> {
   coupleName?: T;
   subdomain?: T;
   customDomain?: T;
   weddingDate?: T;
   isActive?: T;
+  venueName?: T;
+  venueAddress?: T;
+  venueCoordinates?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+      };
+  schedule?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -585,12 +394,15 @@ export interface TenantsSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  tenant?: T;
+  wedding?: T;
   role?: T;
   fullName?: T;
   pin?: T;
-  familyGroup?: T;
-  allowedGuestCount?: T;
+  allowedPlusOnes?: T;
+  isPrimaryContact?: T;
+  invitationSentDate?: T;
+  qrCode?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -610,123 +422,10 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "wedding-info_select".
- */
-export interface WeddingInfoSelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
-  ceremonyDateTime?: T;
-  venueName?: T;
-  venueAddress?: T;
-  venueCoordinates?:
-    | T
-    | {
-        latitude?: T;
-        longitude?: T;
-      };
-  storyTitle?: T;
-  storyContent?: T;
-  additionalInfo?: T;
-  dresscode?: T;
-  schedule?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  tenant?: T;
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        hero?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery_select".
- */
-export interface GallerySelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
-  description?: T;
-  images?:
-    | T
-    | {
-        image?: T;
-        caption?: T;
-        id?: T;
-      };
-  isPublished?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "guests_select".
- */
-export interface GuestsSelect<T extends boolean = true> {
-  tenant?: T;
-  user?: T;
-  fullName?: T;
-  familyGroup?: T;
-  isPrimaryContact?: T;
-  allowedPlusOnes?: T;
-  invitationSentDate?: T;
-  qrCode?: T;
-  notes?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rsvp-responses_select".
  */
 export interface RsvpResponsesSelect<T extends boolean = true> {
-  tenant?: T;
+  wedding?: T;
   guest?: T;
   guestName?: T;
   isAttending?: T;

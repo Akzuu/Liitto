@@ -33,9 +33,9 @@ export const RSVPResponses: CollectionConfig = {
 	},
 	fields: [
 		{
-			name: 'tenant',
+			name: 'wedding',
 			type: 'relationship',
-			relationTo: 'tenants',
+			relationTo: 'weddings',
 			required: true,
 			hasMany: false,
 			admin: {
@@ -45,7 +45,7 @@ export const RSVPResponses: CollectionConfig = {
 		{
 			name: 'guest',
 			type: 'relationship',
-			relationTo: 'guests',
+			relationTo: 'users',
 			required: true,
 			hasMany: false,
 			admin: {
