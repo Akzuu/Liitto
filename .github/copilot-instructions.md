@@ -27,15 +27,22 @@ Liitto is a wedding invitation platform built as a **pnpm + Turborepo monorepo**
 
 ### Payload Collections (Database Schema)
 Located in `apps/web/collections/`:
-1. **Tenants** - Multi-tenant support (for future SaaS)
-2. **Users** - Authentication (admins & guests with 4-digit PINs)
+1. **Weddings** - Wedding instances (multi-tenant support for future SaaS)
+2. **Users** - Unified authentication for all user types:
+   - **Super Admin**: Platform-level access to all weddings (no wedding relationship required)
+   - **Wedding Admin**: Access to specific wedding, manages content and guest list
+   - **Guest**: Linked to single wedding, authenticates with name + auto-generated 4-digit PIN
 3. **WeddingInfo** - Ceremony details, venue, story content
-4. **Media** - Image uploads with responsive sizes
-5. **Gallery** - Photo galleries
-6. **Guests** - Guest list with QR codes
-7. **RSVPResponses** - RSVP form submissions
+4. **RSVPResponses** - RSVP form submissions
 
-All collections include `tenant` relationship for multi-tenant isolation.
+#### User/Guest Workflow:
+- Wedding admin imports guests with: name, allowedPlusOnes
+- 4-digit PIN auto-generated on user creation (shown to admin for printing)
+- Email is optional initially, required only when guest submits RSVP
+- Guests authenticate with name + PIN
+- Guest-specific fields (conditional on role='guest'): allowedPlusOnes, isPrimaryContact, invitationSentDate, qrCode, notes
+
+All collections include `wedding` relationship field for multi-tenant isolation (except super admin users).
 
 ## Development Workflows
 
