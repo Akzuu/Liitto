@@ -2,8 +2,10 @@
 
 import { Button, CardContent } from "@heroui/react";
 import { type KeyboardEvent, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export const PinInput = () => {
+  const router = useRouter();
   const [code, setCode] = useState(["", "", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const inputRefs = [
@@ -81,9 +83,15 @@ export const PinInput = () => {
     }
 
     const formattedCode = `${code[0]}${code[1]}-${code[2]}${code[3]}${code[4]}${code[5]}${code[6]}`;
-    // For now, just a placeholder - you'll need to implement actual auth
+    
+    // For now, always succeed and navigate to invitation page
     console.log("Login attempt:", { code: formattedCode });
-    setError("Authentication not yet implemented");
+    
+    // Store the code in sessionStorage for the invitation page
+    sessionStorage.setItem("invitationCode", formattedCode);
+    
+    // Navigate to invitation page
+    router.push("/invitation");
   };
 
   return (
