@@ -1,5 +1,5 @@
 import { Card, CardHeader } from "@heroui/react";
-import { PinInput } from "./components/pin-input";
+import { PinInput } from "../components/pin-input";
 
 export default function HomePage() {
   return (
