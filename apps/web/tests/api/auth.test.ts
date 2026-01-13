@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { NextRequest } from "next/server";
+import { describe, expect, it } from "vitest";
 import { POST } from "@/app/api/auth/validate/route";
 import {
-  createTestInvitation,
   createTestGuest,
+  createTestInvitation,
   createTestRsvp,
 } from "../helpers/db";
-import { NextRequest } from "next/server";
 
 describe("POST /api/auth/validate", () => {
   it("should return 400 for missing code", async () => {

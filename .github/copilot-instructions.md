@@ -22,10 +22,13 @@ Liitto is a wedding invitation platform built as a **pnpm + Turborepo monorepo**
 - **Frontend**: Next.js 16 with App Router, React 19
 - **UI Library**: HeroUI (`@heroui/react`)
   - **IMPORTANT**: Always consult the HeroUI MCP server (configured in `.vscode/mcp.json`) before using HeroUI components to verify correct API, props, and available exports
-- **Authentication**: Code-based authentication (XX-12345 format: 2 letters + 5 digits)
-  - Codes stored in sessionStorage
-  - No backend authentication yet implemented
+- **Authentication**: Code-based authentication (XXXX-XXXX format: 8 alphanumeric characters)
+  - Format: 4 characters, dash, 4 characters (e.g., ABCD-1234)
+  - All characters can be A-Z or 0-9
+  - Codes stored in sessionStorage (frontend only, will be replaced with backend auth)
 - **Styling**: Tailwind CSS v4 with PostCSS
+- **Database**: PostgreSQL with Drizzle ORM
+- **Testing**: Vitest with separate test database
 
 ### Application Structure
 
@@ -47,12 +50,12 @@ apps/web/
 
 ### Authentication Flow
 
-1. User enters 7-character code (2 letters + 5 digits: e.g., XX-12345)
-2. Code validated client-side (format check only)
-3. Code stored in sessionStorage
-4. User redirected to `/invitation` page
-5. Protected routes check sessionStorage for code
-6. Logout clears sessionStorage and redirects to home
+1. User enters 8-character code (alphanumeric: e.g., ABCD-1234)
+2. Code validated via `POST /api/auth/validate`
+3. Returns minimal metadata (id, code, maxGuests, hasRsvp flag)
+4. **Security**: No personal information (names, emails) returned to prevent info leakage
+5. Frontend stores validation state
+6. User can then access invitation details and submit RSVP
 
 ## Development Workflows
 
@@ -88,6 +91,23 @@ pnpm build        # Build for production
 
 - Apps extend `@repo/typescript-config/nextjs.json`
 - All Next.js apps use `next typegen` for type generation before type checking
+- **CRITICAL: NEVER use `!` (non-null assertion operator)** - It bypasses type safety and leads to runtime errors
+  - Instead: Use proper type guards, optional chaining, or throw errors in helpers
+  - Example:
+
+    ```tsx
+    // ❌ BAD - Using !
+    const value = maybeUndefined!.property;
+
+    // ✅ GOOD - Proper error handling
+    if (!maybeUndefined) {
+      throw new Error("Value is required");
+    }
+    const value = maybeUndefined.property;
+
+    // ✅ GOOD - Optional chaining
+    const value = maybeUndefined?.property;
+    ```
 
 ### Component Patterns
 
@@ -231,3 +251,141 @@ function UserProfileContainer() {
 - React version: **19.2.0** (latest)
 - TypeScript: **5.9.2** (shared across all packages)
 - When adding dependencies to apps, use `workspace:*` for internal packages
+
+## Backend & Database
+
+### Database Setup
+
+- **PostgreSQL** running in Docker (port 5432)
+- **Drizzle ORM** for type-safe database access
+- Separate test database: `liitto_test`
+
+### Database Schema Conventions
+
+- **Table names are SINGULAR** (not plural): `invitation`, `guest`, `rsvp`
+- Use `snake_case` for column names: `primary_guest_name`, `created_at`
+- All tables use UUID primary keys
+- Foreign keys use `onDelete: "cascade"`
+- Always define Drizzle relations for type-safe joins
+
+### Database Commands
+
+```bash
+pnpm db:generate   # Generate migrations from schema
+pnpm db:push       # Push schema to database
+pnpm db:studio     # Open Drizzle Studio
+pnpm db:seed       # Seed test data
+```
+
+### Database Schema
+
+**`invitation` table:**
+
+- `id` (uuid) - Primary key
+- `code` (varchar) - Unique invitation code (XXXX-XXXX format)
+- `primary_guest_name` (varchar) - Main guest name (for reference)
+- `max_guests` (integer) - Total capacity
+- `notes` (text) - Internal notes
+- Timestamps: `created_at`, `updated_at`
+
+**`rsvp` table:**
+
+- `id` (uuid) - Primary key
+- `invitation_id` (uuid) - FK to invitation (unique, one RSVP per invitation)
+- `email` (varchar) - Guest email for confirmations
+- `attending` (boolean)
+- `guest_count` (integer) - Actual number attending
+- `message` (text) - Optional message to bride/groom
+- Timestamps: `submitted_at`, `updated_at`
+
+**`guest` table:**
+
+- `id` (uuid) - Primary key
+- `invitation_id` (uuid) - FK to invitation
+- `name` (varchar)
+- `is_primary` (boolean) - Is this the main guest?
+- `attending` (boolean, nullable) - null until RSVP submitted
+- `dietary_restrictions` (text)
+- `photography_consent` (boolean) - Consent for photos
+- Timestamps: `created_at`, `updated_at`
+
+## Testing
+
+### Testing Setup
+
+- **Vitest** for unit and integration tests
+- **Test database**: `liitto_test` (separate from development)
+- Tests run against real PostgreSQL database
+- Database cleaned between tests via `beforeEach` hooks
+
+### Testing Commands
+
+```bash
+pnpm test           # Run all tests once
+pnpm test:watch     # Run tests in watch mode
+pnpm test:ui        # Open Vitest UI
+pnpm test:coverage  # Generate coverage report
+```
+
+### Testing Best Practices
+
+1. **Test helpers must throw on failure** - Never return `undefined`
+
+   ```tsx
+   // ✅ GOOD - Throws if creation fails
+   export const createTestInvitation = async (overrides) => {
+     const [inv] = await db.insert(invitation).values({...}).returning();
+     if (!inv) throw new Error("Failed to create test invitation");
+     return inv;
+   };
+
+   // ❌ BAD - Can return undefined
+   export const createTestInvitation = async (overrides) => {
+     const [inv] = await db.insert(invitation).values({...}).returning();
+     return inv; // TypeScript infers this as possibly undefined
+   };
+   ```
+
+2. **Use dummy URLs in tests** - Route handlers are tested directly, not via HTTP
+
+   ```tsx
+   // ✅ GOOD - Simple dummy URL
+   const req = new NextRequest("http://test/api/auth/validate", {...});
+
+   // ❌ BAD - Unnecessary environment-dependent URL
+   const req = new NextRequest(`${process.env.BASE_URL}/api/auth/validate`, {...});
+   ```
+
+3. **Security in tests** - Verify that sensitive data is NOT returned
+
+   ```tsx
+   expect(data.invitation.primaryGuestName).toBeUndefined();
+   expect(data.guests).toBeUndefined();
+   ```
+
+4. **Database cleanup** - `beforeEach` in `tests/setup.ts` cleans all tables
+
+### API Testing Patterns
+
+- Import route handlers directly: `import { POST } from "@/app/api/auth/validate/route"`
+- Create `NextRequest` objects with test data
+- Test both success and error cases
+- Always verify that personal information is NOT leaked in error responses
+
+## API Security Conventions
+
+### Authentication Endpoints
+
+1. **Never return 404 for invalid codes** - Always return 400 to prevent code enumeration
+2. **Minimal data on validation** - Only return non-personal metadata:
+   - ✅ `invitation.id`, `invitation.code`, `invitation.maxGuests`
+   - ✅ `hasRsvp` (boolean flag)
+   - ❌ NO guest names, emails, or RSVP details
+3. **Personal data requires authentication** - Guest info only via authenticated endpoints
+
+### Error Responses
+
+- Invalid/missing input: `400 Bad Request`
+- Unauthorized: `401 Unauthorized`
+- Server errors: `500 Internal Server Error`
+- **Never** use `404` for authentication to prevent enumeration attacks
