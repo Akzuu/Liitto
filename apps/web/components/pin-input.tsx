@@ -1,8 +1,8 @@
 "use client";
 
 import { Button, CardContent } from "@heroui/react";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 export const PinInput = () => {
   const router = useRouter();
