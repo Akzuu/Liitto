@@ -114,9 +114,11 @@ pnpm build        # Build for production
 - Use `"use client"` directive for interactive components
 - Export named components with explicit TypeScript types (not interfaces)
 - Components accept `className` prop for styling flexibility
-- Use HeroUI components for UI elements
+- **Use HeroUI components for UI elements** - Consult HeroUI MCP before implementation
+  - Examples: Use `<Spinner />` instead of plain "Loading..." text
+  - Always verify correct props: `variant`, `isPending`, `onPress` (not `color`, `isLoading`, `onClick`)
 - Shared components live in root-level `components/` directory
-- Route-specific components can be co-located with routes
+- Route-specific components can be co-located with routes in a `components/` subfolder
 - **Components with more than 10 lines of JSX should be extracted to their own files**
 
 ### Coding Style & Best Practices
@@ -185,14 +187,75 @@ pnpm build        # Build for production
 
 **Component Architecture:**
 
-- **Split JSX heavily into small, single-purpose components**
+- **Don't return large amounts of JSX from inside conditional blocks** - Extract view states into separate components
+- **Balance component splitting** - Split for clear separation of concerns, but don't over-split every small piece
+  - ✅ Split: Different view states (loading, authenticated, error), reusable UI elements
+  - ❌ Don't split: Simple nav bars, card grids, or tightly coupled sections that don't provide reusability
 - Each component should have one clear responsibility
 - **Separation of concerns:**
   - **Presentation Layer**: Components that only handle UI/display, receive all data via props
   - **Data Layer**: Handles queries, API calls, state management, data fetching
   - Presentation components should be agnostic to where data comes from
 
-Example structure:
+Example structure - Conditional rendering without large JSX blocks:
+
+```tsx
+// ❌ AVOID - Large JSX returned from conditional blocks
+function AdminPage() {
+  const { isPending, data } = useSession();
+
+  if (isPending) {
+    return (
+      <div className="...">
+        <nav>...</nav>
+        <main>...</main>
+        {/* 50+ lines of JSX */}
+      </div>
+    );
+  }
+
+  if (data?.user) {
+    return <div className="...">{/* Another 50+ lines of JSX */}</div>;
+  }
+
+  return <div className="...">{/* More large JSX blocks */}</div>;
+}
+
+// ✅ GOOD - Separate view components, clean conditional rendering
+function AdminPage() {
+  const { isPending, data } = useSession();
+
+  if (isPending) {
+    return <LoadingView />;
+  }
+
+  if (data?.user) {
+    return <AuthenticatedView user={data.user} />;
+  }
+
+  return <LoginView />;
+}
+
+// Each view in its own file
+function LoadingView() {
+  return (
+    <div className="...">
+      <Spinner />
+    </div>
+  );
+}
+
+function LoginView() {
+  // Login form logic and JSX
+}
+
+function AuthenticatedView({ user }: { user: User }) {
+  // Authenticated UI with nav, cards, etc. inline
+  // Don't split nav/cards into separate files unless reused elsewhere
+}
+```
+
+Separation of concerns example:
 
 ```tsx
 // ❌ Avoid - Mixed concerns
