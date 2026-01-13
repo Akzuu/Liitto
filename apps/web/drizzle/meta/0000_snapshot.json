@@ -74,12 +74,8 @@
           "name": "guest_invitation_id_invitation_id_fk",
           "tableFrom": "guest",
           "tableTo": "invitation",
-          "columnsFrom": [
-            "invitation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invitation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -148,9 +144,7 @@
         "invitation_code_unique": {
           "name": "invitation_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -220,12 +214,8 @@
           "name": "rsvp_invitation_id_invitation_id_fk",
           "tableFrom": "rsvp",
           "tableTo": "invitation",
-          "columnsFrom": [
-            "invitation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invitation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -235,9 +225,7 @@
         "rsvp_invitation_id_unique": {
           "name": "rsvp_invitation_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "invitation_id"
-          ]
+          "columns": ["invitation_id"]
         }
       },
       "policies": {},

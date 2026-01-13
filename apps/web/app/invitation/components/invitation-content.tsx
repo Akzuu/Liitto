@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@heroui/react";
-import { InvitationHeader } from "./invitation-header";
 import { EventDetails } from "./event-details";
-import { ScheduleSection } from "./schedule-section";
-import { RsvpSection } from "./rsvp-section";
+import { InvitationHeader } from "./invitation-header";
 import { LogoutSection } from "./logout-section";
+import { RsvpSection } from "./rsvp-section";
+import { ScheduleSection } from "./schedule-section";
 
 type InvitationContentProps = {
   code: string;

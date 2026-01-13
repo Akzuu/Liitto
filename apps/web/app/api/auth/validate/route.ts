@@ -15,7 +15,7 @@ export const POST = async (req: NextRequest) => {
     if (!body.code || typeof body.code !== "string") {
       return NextResponse.json(
         { error: "Invalid code format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -33,7 +33,7 @@ export const POST = async (req: NextRequest) => {
     if (!invitationData) {
       return NextResponse.json(
         { error: "Invalid code format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -50,7 +50,7 @@ export const POST = async (req: NextRequest) => {
     console.error("Error validating invitation:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

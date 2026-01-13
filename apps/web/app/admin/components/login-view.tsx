@@ -22,7 +22,7 @@ export const LoginView = () => {
             router.push("/admin/dashboard");
           },
         },
-      })
+      }),
     );
 
     if (err) {

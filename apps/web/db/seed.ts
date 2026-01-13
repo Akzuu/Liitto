@@ -41,7 +41,7 @@ const seedData = async () => {
         isPrimary: true,
         attending: null,
         photographyConsent: false,
-      }))
+      })),
     )
     .returning();
 

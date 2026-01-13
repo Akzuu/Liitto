@@ -1,9 +1,18 @@
 import { faker } from "@faker-js/faker";
 import { db } from "@/db";
-import { guest, invitation, rsvp } from "@/db/schema";
+import {
+  account,
+  guest,
+  invitation,
+  passkey,
+  rsvp,
+  session,
+  user,
+  verification,
+} from "@/db/schema";
 
 export const createTestInvitation = async (
-  overrides?: Partial<typeof invitation.$inferInsert>
+  overrides?: Partial<typeof invitation.$inferInsert>,
 ) => {
   const [inv] = await db
     .insert(invitation)
@@ -24,7 +33,7 @@ export const createTestInvitation = async (
 
 export const createTestGuest = async (
   invitationId: string,
-  overrides?: Partial<typeof guest.$inferInsert>
+  overrides?: Partial<typeof guest.$inferInsert>,
 ) => {
   const [gst] = await db
     .insert(guest)
@@ -47,7 +56,7 @@ export const createTestGuest = async (
 
 export const createTestRsvp = async (
   invitationId: string,
-  overrides?: Partial<typeof rsvp.$inferInsert>
+  overrides?: Partial<typeof rsvp.$inferInsert>,
 ) => {
   const [rsvpData] = await db
     .insert(rsvp)
@@ -68,7 +77,15 @@ export const createTestRsvp = async (
 };
 
 export const cleanDatabase = async () => {
+  // Clean wedding-related tables
   await db.delete(rsvp);
   await db.delete(guest);
   await db.delete(invitation);
+
+  // Clean Better Auth tables (in order to respect foreign keys)
+  await db.delete(session);
+  await db.delete(account);
+  await db.delete(passkey);
+  await db.delete(verification);
+  await db.delete(user);
 };

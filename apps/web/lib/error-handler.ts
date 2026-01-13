@@ -69,7 +69,7 @@ export const formatError = (error: unknown): AppError => {
  * setUser(data);
  */
 export const handleAsync = async <T>(
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
 ): Promise<[AppError, null] | [null, T]> => {
   try {
     const data = await fn();

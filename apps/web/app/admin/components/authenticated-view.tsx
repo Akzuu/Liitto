@@ -29,7 +29,7 @@ export const AuthenticatedView = ({ user }: AuthenticatedViewProps) => {
             alert("Passkey registered successfully!");
           },
         },
-      })
+      }),
     );
 
     if (err) {
