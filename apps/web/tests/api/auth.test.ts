@@ -59,13 +59,12 @@ describe("POST /api/auth/validate", () => {
     expect(response.status).toBe(200);
     expect(data.invitation).toMatchObject({
       code: "ABCD-1234",
-      primaryGuestName: "John Smith",
       maxGuests: 2,
     });
-    expect(data.guests).toHaveLength(1);
-    expect(data.guests[0].name).toBe("John Smith");
-    expect(data.guests[0].isPrimary).toBe(true);
-    expect(data.rsvp).toBeNull();
+    expect(data.invitation.id).toBeDefined();
+    expect(data.invitation.primaryGuestName).toBeUndefined();
+    expect(data.guests).toBeUndefined();
+    expect(data.hasRsvp).toBe(false);
   });
 
   it("should return RSVP data if already submitted", async () => {
@@ -92,10 +91,8 @@ describe("POST /api/auth/validate", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.rsvp).toBeDefined();
-    expect(data.rsvp.email).toBe("test@example.com");
-    expect(data.rsvp.attending).toBe(true);
-    expect(data.rsvp.guestCount).toBe(2);
+    expect(data.hasRsvp).toBe(true);
+    expect(data.rsvp).toBeUndefined();
   });
 
   it("should handle case-insensitive codes", async () => {
@@ -116,5 +113,6 @@ describe("POST /api/auth/validate", () => {
 
     expect(response.status).toBe(200);
     expect(data.invitation.code).toBe("WXYZ-1111");
+    expect(data.hasRsvp).toBe(false);
   });
 });

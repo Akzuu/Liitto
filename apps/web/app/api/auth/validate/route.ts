@@ -22,11 +22,10 @@ export const POST = async (req: NextRequest) => {
     // Normalize code (uppercase, ensure format)
     const normalizedCode = body.code.toUpperCase().trim();
 
-    // Query invitation with guests
+    // Query invitation
     const invitationData = await db.query.invitation.findFirst({
       where: eq(invitation.code, normalizedCode),
       with: {
-        guests: true,
         rsvp: true,
       },
     });
@@ -38,16 +37,14 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    // Return invitation data
+    // Return only non-personal metadata
     return NextResponse.json({
       invitation: {
         id: invitationData.id,
         code: invitationData.code,
-        primaryGuestName: invitationData.primaryGuestName,
         maxGuests: invitationData.maxGuests,
       },
-      guests: invitationData.guests || [],
-      rsvp: invitationData.rsvp || null,
+      hasRsvp: !!invitationData.rsvp,
     });
   } catch (error) {
     console.error("Error validating invitation:", error);
