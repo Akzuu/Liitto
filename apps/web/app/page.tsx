@@ -10,7 +10,7 @@ export default function HomePage() {
             Tervetuloa häihimme!
           </h1>
           <p className="text-sm text-center text-gray-700">
-            Ole hyvä ja syötä kutsukoodisi (esim. XX-12345)
+            Ole hyvä ja syötä kutsukoodisi (esim. ABCD-1234)
           </p>
         </CardHeader>
         <PinInput />
