@@ -6,7 +6,9 @@
         "name": "next"
       }
     ],
-    "paths": {}
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": [
     "**/*.ts",
