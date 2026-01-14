@@ -52,7 +52,6 @@ export const DashboardContent = () => {
             title="Users"
             description="Manage admin users and approvals"
             href="/admin/users"
-            count="Coming soon"
           />
           <DashboardCard
             title="Invitations"

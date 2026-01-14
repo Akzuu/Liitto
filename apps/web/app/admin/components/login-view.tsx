@@ -30,21 +30,27 @@ export const LoginView = () => {
     setIsLoading(true);
     setError(null);
 
-    const [err] = await handleAsync(() =>
-      signIn.passkey({
+    try {
+      const result = await signIn.passkey({
         fetchOptions: {
           onSuccess: () => {
             router.push("/admin/dashboard");
           },
+          onError: () => {
+            setError("Authentication failed. Please try again.");
+            setIsLoading(false);
+          },
         },
-      })
-    );
+      });
 
-    if (err) {
-      setError(err.message);
+      if (!result) {
+        setError("Authentication failed. Please try again.");
+        setIsLoading(false);
+      }
+    } catch {
+      setError("Authentication failed. Please try again.");
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handlePasswordSignIn = async (e: React.FormEvent) => {
