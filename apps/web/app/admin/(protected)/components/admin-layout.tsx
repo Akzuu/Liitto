@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@heroui/react";
-import { House } from "lucide-react";
+import { Button, Dropdown } from "@heroui/react";
+import { ChevronDown, House } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider-client";
 import { signOut } from "@/lib/auth-client";
 
@@ -19,11 +19,8 @@ export const AdminLayout = ({
   description,
 }: AdminLayoutProps) => {
   const router = useRouter();
-  const pathname = usePathname();
   const { session } = useAuth();
   const user = session.user;
-
-  const isDashboard = pathname === "/admin/dashboard";
 
   const handleSignOut = async () => {
     await signOut();
@@ -45,15 +42,23 @@ export const AdminLayout = ({
               <h1 className="text-2xl font-bold">{title}</h1>
             </div>
             <div className="flex items-center gap-4">
-              {isDashboard && (
-                <Link
-                  href="/admin/passkeys"
-                  className="text-sm text-blue-600 hover:text-blue-700 underline"
-                >
-                  Manage Passkeys
-                </Link>
-              )}
-              <span className="text-sm text-gray-600">{user.email}</span>
+              <Dropdown>
+                <Button variant="secondary" size="sm">
+                  <span>{user.email}</span>
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+                <Dropdown.Popover>
+                  <Dropdown.Menu
+                    onAction={(key) => {
+                      if (key === "passkeys") {
+                        router.push("/admin/passkeys");
+                      }
+                    }}
+                  >
+                    <Dropdown.Item id="passkeys">Manage Passkeys</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>
               <Button onPress={handleSignOut} variant="secondary" size="sm">
                 Sign Out
               </Button>

@@ -195,6 +195,16 @@ export const LoginView = () => {
             Register here
           </Link>
         </p>
+
+        <p className="mt-4 text-center text-sm text-gray-500">
+          Looking for the guest invitation?{" "}
+          <Link
+            href="/"
+            className="font-medium text-blue-600 hover:text-blue-700"
+          >
+            Go to main page
+          </Link>
+        </p>
       </div>
     </div>
   );
