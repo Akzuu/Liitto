@@ -1,5 +1,39 @@
 # Liitto - Copilot Instructions
 
+## AI Development Workflow
+
+### Making Changes: Keep It Minimal & Reviewable
+
+**CRITICAL PRINCIPLE**: Make changes in small, reviewable increments. The human needs to understand and approve each step.
+
+**When implementing multi-file changes:**
+
+1. **Show new abstractions FIRST** - Before using them everywhere
+   - Create the new component/utility/abstraction
+   - Show it to the user for review
+   - Example: When creating `AuthProvider`, show its implementation before refactoring all pages to use it
+
+2. **Explain the plan** - Before executing
+   - List what files will change
+   - Describe the pattern being introduced
+   - Ask clarifying questions if unsure
+
+3. **Incremental rollout** - Don't change everything at once
+   - Implement the foundation (1-2 files)
+   - Wait for feedback
+   - Then propagate the pattern to remaining files
+
+4. **Avoid large parallel changes** - Makes review harder
+   - ❌ Creating 5 new files + updating 10 existing files simultaneously
+   - ✅ Create 1-2 core abstractions → get feedback → update consumers
+
+**Why this matters:**
+
+- Easier to review and understand changes
+- Catches issues early before they propagate
+- User can provide feedback on approach before full implementation
+- Reduces cognitive load during code review
+
 ## Project Overview
 
 Liitto is a wedding invitation platform built as a **pnpm + Turborepo monorepo** with Next.js apps. The platform uses:
@@ -48,7 +82,60 @@ apps/web/
 └── package.json
 ```
 
-### Authentication Flow
+### Authentication & Route Protection
+
+**Admin Authentication** (Better Auth with passkeys):
+
+The platform uses a **three-layer protection system** following Next.js 16 best practices:
+
+1. **Proxy (`proxy.ts`)** - First line of defense
+   - Intercepts ALL requests to routes containing `(protected)` folder
+   - Checks session from Better Auth
+   - Redirects to `/admin?error=unauthorized` if no valid session
+   - Runs before any page renders
+
+2. **Data Access Layer (`lib/dal.ts`)** - Centralized auth logic
+   - `verifySession()` - Fetches and validates session using React cache
+   - `getUser()` - Helper to get current authenticated user
+   - Use in Server Components for auth checks
+   - Follows Next.js recommended security patterns
+
+3. **Auth Context (`components/auth-provider.tsx`)** - For Client Components
+   - Server Component wrapper that fetches session via DAL
+   - Client Component provider that exposes `useAuth()` hook
+   - Used in `(protected)` layouts to provide session to all descendants
+   - Access session in Client Components: `const { session } = useAuth()`
+
+**How to protect routes:**
+
+- Place routes under `(protected)` route group (e.g., `/app/admin/(protected)/dashboard/`)
+- Layout automatically wraps with `<AuthProvider>`
+- Pages can use `useAuth()` in Client Components or call DAL functions in Server Components
+- **Never manually check auth in pages** - proxy and layout handle it
+
+**Example usage:**
+
+```tsx
+// Client Component under (protected)
+"use client";
+import { useAuth } from "@/components/auth-provider-client";
+
+export const MyComponent = () => {
+  const { session } = useAuth();
+  const user = session.user;
+  // ...
+};
+
+// Server Component (if needed)
+import { verifySession } from "@/lib/dal";
+
+export const MyServerComponent = async () => {
+  const session = await verifySession();
+  // ...
+};
+```
+
+**Guest Invitation Authentication** (Legacy - to be migrated):
 
 1. User enters 8-character code (alphanumeric: e.g., ABCD-1234)
 2. Code validated via `POST /api/auth/validate`
