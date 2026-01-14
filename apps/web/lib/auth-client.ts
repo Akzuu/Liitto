@@ -1,10 +1,11 @@
 import { passkeyClient } from "@better-auth/passkey/client";
+import { adminClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { formatError } from "./error-handler";
 
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  plugins: [passkeyClient()],
+  plugins: [passkeyClient(), adminClient()],
   fetchOptions: {
     onError: (context) => {
       // Format Better Auth errors consistently
@@ -21,4 +22,5 @@ export const authClient = createAuthClient({
   },
 });
 
-export const { signIn, signUp, signOut, useSession, passkey } = authClient;
+export const { signIn, signUp, signOut, useSession, passkey, admin } =
+  authClient;

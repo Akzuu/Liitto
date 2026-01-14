@@ -49,6 +49,12 @@ export const DashboardContent = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <DashboardCard
+            title="Users"
+            description="Manage admin users and approvals"
+            href="/admin/users"
+            count="Coming soon"
+          />
+          <DashboardCard
             title="Invitations"
             description="Manage wedding invitations and codes"
             href="/admin/invitations"

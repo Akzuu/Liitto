@@ -1,6 +1,6 @@
 import "server-only";
-import { cache } from "react";
 import { headers } from "next/headers";
+import { cache } from "react";
 import { auth, type Session } from "@/auth";
 
 /**
@@ -9,15 +9,15 @@ import { auth, type Session } from "@/auth";
  * Uses React cache to memoize the result during a render pass.
  */
 export const verifySession = cache(async (): Promise<Session | null> => {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-	if (!session) {
-		return null;
-	}
+  if (!session) {
+    return null;
+  }
 
-	return session;
+  return session;
 });
 
 /**
@@ -25,11 +25,30 @@ export const verifySession = cache(async (): Promise<Session | null> => {
  * Returns null if no valid session exists.
  */
 export const getUser = cache(async () => {
-	const session = await verifySession();
+  const session = await verifySession();
 
-	if (!session?.user) {
-		return null;
-	}
+  if (!session?.user) {
+    return null;
+  }
 
-	return session.user;
+  return session.user;
+});
+
+/**
+ * Verify the user has admin role.
+ * Returns the session if user is admin, null otherwise.
+ */
+export const verifyAdminSession = cache(async (): Promise<Session | null> => {
+  const session = await verifySession();
+
+  if (!session?.user) {
+    return null;
+  }
+
+  // Check if user has admin role
+  if (session.user.role !== "admin") {
+    return null;
+  }
+
+  return session;
 });
