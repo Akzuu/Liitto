@@ -83,6 +83,15 @@ export const PendingView = ({ email }: PendingViewProps) => {
           </div>
 
           <Button
+            variant="primary"
+            size="lg"
+            className="w-full"
+            onPress={() => router.push("/admin/setup-passkey")}
+          >
+            Setup Passkey While Waiting
+          </Button>
+
+          <Button
             variant="secondary"
             size="lg"
             className="w-full"

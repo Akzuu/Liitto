@@ -31,24 +31,25 @@ export const LoginView = () => {
     setError(null);
 
     try {
-      const result = await signIn.passkey({
+      await signIn.passkey({
         fetchOptions: {
           onSuccess: () => {
             router.push("/admin/dashboard");
           },
           onError: () => {
             setError("Authentication failed. Please try again.");
-            setIsLoading(false);
           },
         },
       });
-
-      if (!result) {
+    } catch (err) {
+      // User cancelled or error occurred
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        // User cancelled - don't show error, just reset
+        setError(null);
+      } else {
         setError("Authentication failed. Please try again.");
-        setIsLoading(false);
       }
-    } catch {
-      setError("Authentication failed. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };

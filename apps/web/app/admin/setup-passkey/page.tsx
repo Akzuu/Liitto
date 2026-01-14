@@ -8,9 +8,16 @@ import { handleAsync } from "@/lib/error-handler";
 
 const SetupPasskeyPage = () => {
   const router = useRouter();
-  const { isPending } = useSession();
+  const { data: session, isPending } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getRedirectPath = () => {
+    if (session?.user.role === "admin") {
+      return "/admin/dashboard";
+    }
+    return "/admin/pending";
+  };
 
   const handleSetupPasskey = async () => {
     setIsLoading(true);
@@ -20,7 +27,7 @@ const SetupPasskeyPage = () => {
       passkey.addPasskey({
         fetchOptions: {
           onSuccess: () => {
-            router.push("/admin/dashboard");
+            router.push(getRedirectPath());
           },
         },
       })
@@ -34,7 +41,7 @@ const SetupPasskeyPage = () => {
   };
 
   const handleSkip = () => {
-    router.push("/admin/dashboard");
+    router.push(getRedirectPath());
   };
 
   if (isPending) {

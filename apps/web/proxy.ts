@@ -5,8 +5,21 @@ import { auth } from "@/auth";
 export const proxy = async (req: NextRequest) => {
   const path = req.nextUrl.pathname;
 
-  // Check if the path contains (protected) route group
-  const isProtectedRoute = path.includes("/(protected)/");
+  // Check if this is a protected admin route
+  // Protected routes: /admin/dashboard, /admin/users, /admin/passkeys, etc.
+  // Non-protected: /admin (login), /admin/register, /admin/setup-passkey, /admin/pending
+  const protectedRoutes = [
+    "/admin/dashboard",
+    "/admin/users",
+    "/admin/passkeys",
+    "/admin/invitations",
+    "/admin/rsvps",
+    "/admin/guests",
+  ];
+
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    path.startsWith(route)
+  );
 
   if (!isProtectedRoute) {
     return NextResponse.next();
@@ -28,10 +41,6 @@ export const proxy = async (req: NextRequest) => {
   if (session.user.role !== "admin") {
     // Redirect pending users to pending approval page
     if (session.user.role === "pending") {
-      // Allow access to the pending page itself
-      if (path.includes("/admin/pending")) {
-        return NextResponse.next();
-      }
       const pendingUrl = new URL("/admin/pending", req.url);
       return NextResponse.redirect(pendingUrl);
     }
