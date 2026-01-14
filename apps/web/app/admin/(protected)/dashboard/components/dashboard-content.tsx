@@ -1,17 +1,14 @@
 "use client";
 
 import { Button } from "@heroui/react";
+import { useAuth } from "@/components/auth-provider-client";
 import { signOut } from "@/lib/auth-client";
 import { DashboardCard } from "./dashboard-card";
 
-type DashboardContentProps = {
-  user: {
-    email: string;
-    name?: string;
-  };
-};
+export const DashboardContent = () => {
+  const { session } = useAuth();
+  const user = session.user;
 
-export const DashboardContent = ({ user }: DashboardContentProps) => {
   const handleSignOut = async () => {
     await signOut();
   };

@@ -3,20 +3,16 @@
 import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/components/auth-provider-client";
 import { passkey } from "@/lib/auth-client";
 import { handleAsync } from "@/lib/error-handler";
 
-type AuthenticatedViewProps = {
-  user: {
-    email: string;
-    name?: string;
-  };
-};
-
-export const AuthenticatedView = ({ user }: AuthenticatedViewProps) => {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const AuthenticatedView = () => {
+	const router = useRouter();
+	const { session } = useAuth();
+	const user = session.user;
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
   const handleRegisterPasskey = async () => {
     setIsLoading(true);

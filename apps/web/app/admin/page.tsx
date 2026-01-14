@@ -1,22 +1,27 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
+import { AuthProviderClient } from "@/components/auth-provider-client";
 import { AuthenticatedView } from "./components/authenticated-view";
 import { LoadingView } from "./components/loading-view";
 import { LoginView } from "./components/login-view";
 
 const AdminLoginPage = () => {
-  const { data: session, isPending } = useSession();
+	const { data: session, isPending } = useSession();
 
-  if (isPending) {
-    return <LoadingView />;
-  }
+	if (isPending) {
+		return <LoadingView />;
+	}
 
-  if (session?.user) {
-    return <AuthenticatedView user={session.user} />;
-  }
+	if (session) {
+		return (
+			<AuthProviderClient session={session}>
+				<AuthenticatedView />
+			</AuthProviderClient>
+		);
+	}
 
-  return <LoginView />;
+	return <LoginView />;
 };
 
 export default AdminLoginPage;

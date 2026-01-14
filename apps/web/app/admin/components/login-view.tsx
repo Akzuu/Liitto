@@ -1,33 +1,42 @@
 "use client";
 
 import { Button } from "@heroui/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { signIn } from "@/lib/auth-client";
 import { handleAsync } from "@/lib/error-handler";
 
 export const LoginView = () => {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  const handlePasskeySignIn = async () => {
-    setIsLoading(true);
-    setError(null);
+	// Show error from URL params (e.g., from proxy redirect)
+	useEffect(() => {
+		const errorParam = searchParams.get("error");
+		if (errorParam === "unauthorized") {
+			setError("You must be logged in to access that page");
+		}
+	}, [searchParams]);
 
-    const [err] = await handleAsync(() =>
-      signIn.passkey({
-        fetchOptions: {
-          onSuccess: () => {
-            router.push("/admin/dashboard");
-          },
-        },
-      }),
-    );
+	const handlePasskeySignIn = async () => {
+		setIsLoading(true);
+		setError(null);
 
-    if (err) {
-      setError(err.message);
-    }
+		const [err] = await handleAsync(() =>
+			signIn.passkey({
+				fetchOptions: {
+					onSuccess: () => {
+						router.push("/admin/dashboard");
+					},
+				},
+			}),
+		);
+
+		if (err) {
+			setError(err.message);
+		}
 
     setIsLoading(false);
   };
