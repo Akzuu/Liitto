@@ -3,6 +3,7 @@
 import { Alert, Button, Card, Spinner } from "@heroui/react";
 import { Pencil, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { QRCodeDisplay } from "./qr-code-display";
 
 type Guest = {
   id: string;
@@ -16,9 +17,14 @@ type Guest = {
 type GuestsListProps = {
   onEdit: (guest: Guest) => void;
   onDelete: () => void;
+  onGuestsLoaded?: (guests: Guest[]) => void;
 };
 
-export const GuestsList = ({ onEdit, onDelete }: GuestsListProps) => {
+export const GuestsList = ({
+  onEdit,
+  onDelete,
+  onGuestsLoaded,
+}: GuestsListProps) => {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,12 +41,13 @@ export const GuestsList = ({ onEdit, onDelete }: GuestsListProps) => {
 
       const data = await response.json();
       setGuests(data.guests);
+      onGuestsLoaded?.(data.guests);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [onGuestsLoaded]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this guest?")) {
@@ -130,6 +137,10 @@ export const GuestsList = ({ onEdit, onDelete }: GuestsListProps) => {
                 )}
               </div>
               <div className="flex gap-2">
+                <QRCodeDisplay
+                  code={guest.code}
+                  guestName={guest.primaryGuestName}
+                />
                 <Button
                   onPress={() => onEdit(guest)}
                   variant="secondary"
