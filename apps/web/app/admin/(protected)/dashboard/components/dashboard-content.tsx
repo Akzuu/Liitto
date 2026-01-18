@@ -33,9 +33,8 @@ export const DashboardContent = () => {
         />
         <DashboardCard
           title="Guests"
-          description="Manage guest information"
+          description="Manage guest list before generating invitations"
           href="/admin/guests"
-          count="Coming soon"
         />
       </div>
     </AdminLayout>

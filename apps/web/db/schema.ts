@@ -12,7 +12,7 @@ import {
 
 export const invitation = pgTable("invitation", {
   id: uuid("id").defaultRandom().primaryKey(),
-  code: varchar("code", { length: 9 }).notNull().unique(),
+  code: varchar("code", { length: 9 }).unique(),
   primaryGuestName: varchar("primary_guest_name", { length: 255 }).notNull(),
   maxGuests: integer("max_guests").notNull().default(2),
   notes: text("notes"),
