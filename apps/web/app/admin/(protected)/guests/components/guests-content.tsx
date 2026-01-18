@@ -12,13 +12,13 @@ type Guest = {
   primaryGuestName: string;
   maxGuests: number;
   notes: string | null;
-  code: string | null;
+  code: string;
   createdAt: Date;
 };
 
 export const GuestsContent = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
+  const [editingGuest, setEditingGuest] = useState<Guest | undefined>();
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleEdit = (guest: Guest) => {
@@ -28,7 +28,7 @@ export const GuestsContent = () => {
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
-    setEditingGuest(null);
+    setEditingGuest(undefined);
   };
 
   const handleSuccess = () => {

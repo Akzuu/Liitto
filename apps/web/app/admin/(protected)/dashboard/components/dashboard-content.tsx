@@ -20,12 +20,6 @@ export const DashboardContent = () => {
           href="/admin/users"
         />
         <DashboardCard
-          title="Invitations"
-          description="Manage wedding invitations and codes"
-          href="/admin/invitations"
-          count="Coming soon"
-        />
-        <DashboardCard
           title="RSVPs"
           description="View and manage guest responses"
           href="/admin/rsvps"

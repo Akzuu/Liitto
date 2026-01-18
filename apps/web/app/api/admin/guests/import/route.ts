@@ -1,8 +1,10 @@
+import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { db } from "@/db";
 import { invitation } from "@/db/schema";
 import { verifySession } from "@/lib/dal";
+import { generateInvitationCode } from "@/lib/invitation-code";
 
 type ImportRow = {
   name: string;
@@ -105,15 +107,54 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    // Insert guests in bulk
+    // Generate unique codes for all guests
+    const existingCodes = new Set<string>();
+    const codesForRows: string[] = [];
+
+    for (const _row of rows) {
+      let code: string;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (attempts < maxAttempts) {
+        code = generateInvitationCode();
+
+        // Check against existing codes in DB and newly generated codes
+        const [existing] = await db
+          .select()
+          .from(invitation)
+          .where(eq(invitation.code, code))
+          .limit(1);
+
+        if (!existing && !existingCodes.has(code)) {
+          existingCodes.add(code);
+          codesForRows.push(code);
+          break;
+        }
+        attempts++;
+      }
+
+      if (attempts === maxAttempts) {
+        throw new Error("Failed to generate unique invitation codes");
+      }
+    }
+
+    // Insert guests in bulk with generated codes
     const inserted = await db
       .insert(invitation)
       .values(
-        rows.map((row) => ({
-          primaryGuestName: row.name,
-          maxGuests: row.maxGuests,
-          notes: row.notes || null,
-        }))
+        rows.map((row, index) => {
+          const code = codesForRows[index];
+          if (!code) {
+            throw new Error(`Missing code for row ${index}`);
+          }
+          return {
+            code,
+            primaryGuestName: row.name,
+            maxGuests: row.maxGuests,
+            notes: row.notes || null,
+          };
+        })
       )
       .returning();
 

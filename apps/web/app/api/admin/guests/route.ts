@@ -1,11 +1,12 @@
-import { eq, isNull, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
 import { invitation } from "@/db/schema";
 import { verifySession } from "@/lib/dal";
+import { generateInvitationCode } from "@/lib/invitation-code";
 
-// GET all guests (invitations without codes yet)
+// GET all guests
 export const GET = async () => {
   try {
     const session = await verifySession();
@@ -62,9 +63,33 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
+    // Generate unique invitation code
+    let code: string | undefined;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      code = generateInvitationCode();
+      const existing = await db
+        .select()
+        .from(invitation)
+        .where(eq(invitation.code, code))
+        .limit(1);
+
+      if (existing.length === 0) {
+        break;
+      }
+      attempts++;
+    }
+
+    if (!code) {
+      throw new Error("Failed to generate unique invitation code");
+    }
+
     const [newGuest] = await db
       .insert(invitation)
       .values({
+        code,
         primaryGuestName: result.data.primaryGuestName,
         maxGuests: result.data.maxGuests,
         notes: result.data.notes || null,

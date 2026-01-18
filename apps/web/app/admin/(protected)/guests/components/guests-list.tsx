@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Button, Card, Spinner } from "@heroui/react";
-import { CheckCircle, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 type Guest = {
@@ -9,7 +9,7 @@ type Guest = {
   primaryGuestName: string;
   maxGuests: number;
   notes: string | null;
-  code: string | null;
+  code: string;
   createdAt: Date;
 };
 
@@ -116,22 +116,14 @@ export const GuestsList = ({ onEdit, onDelete }: GuestsListProps) => {
                   <h3 className="text-lg font-semibold">
                     {guest.primaryGuestName}
                   </h3>
-                  {guest.code && (
-                    <span className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-sm text-green-800">
-                      <CheckCircle className="h-4 w-4" />
-                      Invitation Generated
-                    </span>
-                  )}
                 </div>
                 <div className="mt-2 flex gap-6 text-sm text-gray-600">
                   <span>
                     Max Guests: <strong>{guest.maxGuests}</strong>
                   </span>
-                  {guest.code && (
-                    <span>
-                      Code: <strong className="font-mono">{guest.code}</strong>
-                    </span>
-                  )}
+                  <span>
+                    Code: <strong className="font-mono">{guest.code}</strong>
+                  </span>
                 </div>
                 {guest.notes && (
                   <p className="mt-2 text-sm text-gray-500">{guest.notes}</p>

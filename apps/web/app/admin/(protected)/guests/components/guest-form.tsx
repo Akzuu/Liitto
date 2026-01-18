@@ -17,12 +17,11 @@ type Guest = {
   primaryGuestName: string;
   maxGuests: number;
   notes: string | null;
-  code: string | null;
-  createdAt: Date;
+  code: string;
 };
 
 type GuestFormProps = {
-  guest: Guest | null;
+  guest?: Guest;
   onClose: () => void;
   onSuccess: () => void;
 };
