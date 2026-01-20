@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminLayout } from "../../components/admin-layout";
 import { AddGuestButton } from "./add-guest-button";
 import { GuestForm } from "./guest-form";
@@ -22,6 +22,23 @@ export const GuestsContent = () => {
   const [editingGuest, setEditingGuest] = useState<Guest | undefined>();
   const [refreshKey, setRefreshKey] = useState(0);
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [rsvpDeadline, setRsvpDeadline] = useState("15.3.2026");
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/admin/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setRsvpDeadline(data.settings.rsvpDeadline || "15.3.2026");
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings:", err);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   const handleEdit = (guest: Guest) => {
     setEditingGuest(guest);
@@ -44,7 +61,9 @@ export const GuestsContent = () => {
       description="Manage your wedding guest list. Add guests and their details before generating invitation codes."
     >
       <div className="mb-6 flex justify-end gap-3">
-        {guests.length > 0 && <QRCodePrint guests={guests} />}
+        {guests.length > 0 && (
+          <QRCodePrint guests={guests} rsvpDeadline={rsvpDeadline} />
+        )}
         <ImportGuestsButton onSuccess={handleSuccess} />
         <AddGuestButton onPress={() => setIsFormOpen(true)} />
       </div>

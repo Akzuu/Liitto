@@ -23,8 +23,13 @@ export const AdminLayout = ({
   const user = session.user;
 
   const handleSignOut = async () => {
-    await signOut();
-    router.push("/admin");
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          window.location.href = "/admin";
+        },
+      },
+    });
   };
 
   return (

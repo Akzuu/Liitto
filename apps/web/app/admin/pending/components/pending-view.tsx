@@ -12,8 +12,13 @@ export const PendingView = ({ email }: PendingViewProps) => {
 
   const handleSignOut = async () => {
     const { signOut } = await import("@/lib/auth-client");
-    await signOut();
-    router.push("/admin");
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          window.location.href = "/admin";
+        },
+      },
+    });
   };
 
   return (

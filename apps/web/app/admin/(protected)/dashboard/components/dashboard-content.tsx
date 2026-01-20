@@ -15,9 +15,14 @@ export const DashboardContent = () => {
     >
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <DashboardCard
-          title="Users"
-          description="Manage admin users and approvals"
-          href="/admin/users"
+          title="Settings"
+          description="Configure wedding details and RSVP deadline"
+          href="/admin/settings"
+        />
+        <DashboardCard
+          title="Guests"
+          description="Manage guest list before generating invitations"
+          href="/admin/guests"
         />
         <DashboardCard
           title="RSVPs"
@@ -26,9 +31,9 @@ export const DashboardContent = () => {
           count="Coming soon"
         />
         <DashboardCard
-          title="Guests"
-          description="Manage guest list before generating invitations"
-          href="/admin/guests"
+          title="Users"
+          description="Manage admin users and approvals"
+          href="/admin/users"
         />
       </div>
     </AdminLayout>

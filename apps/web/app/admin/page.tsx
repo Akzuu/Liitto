@@ -1,27 +1,30 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
-import { AuthProviderClient } from "@/components/auth-provider-client";
-import { AuthenticatedView } from "./components/authenticated-view";
 import { LoadingView } from "./components/loading-view";
 import { LoginView } from "./components/login-view";
 
 const AdminLoginPage = () => {
-	const { data: session, isPending } = useSession();
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
 
-	if (isPending) {
-		return <LoadingView />;
-	}
+  useEffect(() => {
+    if (session) {
+      router.push("/admin/dashboard");
+    }
+  }, [session, router]);
 
-	if (session) {
-		return (
-			<AuthProviderClient session={session}>
-				<AuthenticatedView />
-			</AuthProviderClient>
-		);
-	}
+  if (isPending) {
+    return <LoadingView />;
+  }
 
-	return <LoginView />;
+  if (session) {
+    return <LoadingView />;
+  }
+
+  return <LoginView />;
 };
 
 export default AdminLoginPage;

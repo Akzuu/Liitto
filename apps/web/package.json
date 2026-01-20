@@ -23,6 +23,7 @@
     "@better-auth/passkey": "^1.4.12",
     "@heroui/react": "3.0.0-beta.3",
     "@heroui/styles": "3.0.0-beta.3",
+    "@internationalized/date": "^3.10.1",
     "@tailwindcss/postcss": "^4.1.18",
     "better-auth": "^1.4.12",
     "drizzle-orm": "^0.45.1",

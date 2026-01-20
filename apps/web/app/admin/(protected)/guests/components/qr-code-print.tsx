@@ -13,13 +13,10 @@ type Guest = {
 
 type QRCodePrintProps = {
   guests: Guest[];
-  rsvpDeadline?: string;
+  rsvpDeadline: string;
 };
 
-export const QRCodePrint = ({
-  guests,
-  rsvpDeadline = "15.3.2026",
-}: QRCodePrintProps) => {
+export const QRCodePrint = ({ guests, rsvpDeadline }: QRCodePrintProps) => {
   const [isPrintReady, setIsPrintReady] = useState(false);
 
   const handlePrint = () => {

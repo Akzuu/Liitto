@@ -32,6 +32,9 @@ importers:
       '@heroui/styles':
         specifier: 3.0.0-beta.3
         version: 3.0.0-beta.3(tailwindcss@4.1.18)
+      '@internationalized/date':
+        specifier: ^3.10.1
+        version: 3.10.1
       '@tailwindcss/postcss':
         specifier: ^4.1.18
         version: 4.1.18

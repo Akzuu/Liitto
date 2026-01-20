@@ -67,6 +67,20 @@ export const guestRelations = relations(guest, ({ one }) => ({
   }),
 }));
 
+// Wedding settings table (single row)
+export const weddingSettings = pgTable("wedding_settings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  rsvpDeadline: varchar("rsvp_deadline", { length: 20 }).notNull(),
+  weddingDate: varchar("wedding_date", { length: 20 }),
+  brideName: varchar("bride_name", { length: 255 }),
+  groomName: varchar("groom_name", { length: 255 }),
+  venue: text("venue"),
+  ceremonyTime: varchar("ceremony_time", { length: 50 }),
+  receptionTime: varchar("reception_time", { length: 50 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Better Auth tables
 export const user = pgTable("user", {
   id: text("id").primaryKey(),

@@ -23,8 +23,10 @@ export const LoginView = () => {
     const errorParam = searchParams.get("error");
     if (errorParam === "unauthorized") {
       setError("You must be logged in to access that page");
+      // Clear the error param from URL to prevent it from showing after manual logout
+      router.replace("/admin");
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   const handlePasskeySignIn = async () => {
     setIsLoading(true);
@@ -68,7 +70,7 @@ export const LoginView = () => {
             router.push("/admin/dashboard");
           },
         },
-      })
+      }),
     );
 
     if (err) {
