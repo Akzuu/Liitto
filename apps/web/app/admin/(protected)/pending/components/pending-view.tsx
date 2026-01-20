@@ -2,6 +2,7 @@
 
 import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { signOut } from "@/lib/auth-client";
 
 type PendingViewProps = {
   email: string;
@@ -12,7 +13,6 @@ export const PendingView = ({ email, hasPasskeys }: PendingViewProps) => {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    const { signOut } = await import("@/lib/auth-client");
     await signOut({
       fetchOptions: {
         onSuccess: () => {
