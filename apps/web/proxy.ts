@@ -5,23 +5,25 @@ import { auth } from "@/auth";
 export const proxy = async (req: NextRequest) => {
   const path = req.nextUrl.pathname;
 
-  // Check if this is a protected admin route
-  // Protected routes: /admin/dashboard, /admin/users, /admin/passkeys, etc.
-  // Non-protected: /admin (login), /admin/register, /admin/setup-passkey, /admin/pending
-  const protectedRoutes = [
+  // Check if this is an admin-only route
+  // Admin-only routes: /admin/dashboard, /admin/users, /admin/passkeys, etc.
+  // /admin/pending is protected by layout but not in this list (accessible to pending users)
+  // Non-protected: /admin (login), /admin/register, /admin/setup-passkey
+  const adminOnlyRoutes = [
     "/admin/dashboard",
     "/admin/users",
     "/admin/passkeys",
     "/admin/invitations",
-    "/admin/rsvps",
+    "/admin/rsvp",
     "/admin/guests",
+    "/admin/settings",
   ];
 
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    path.startsWith(route)
+  const isAdminOnlyRoute = adminOnlyRoutes.some((route) =>
+    path.startsWith(route),
   );
 
-  if (!isProtectedRoute) {
+  if (!isAdminOnlyRoute) {
     return NextResponse.next();
   }
 
@@ -39,7 +41,7 @@ export const proxy = async (req: NextRequest) => {
 
   // Check if user has admin role
   if (session.user.role !== "admin") {
-    // Redirect pending users to pending approval page
+    // Redirect pending users to pending approval page (not in admin-only list)
     if (session.user.role === "pending") {
       const pendingUrl = new URL("/admin/pending", req.url);
       return NextResponse.redirect(pendingUrl);

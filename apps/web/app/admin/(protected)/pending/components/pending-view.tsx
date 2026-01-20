@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 
 type PendingViewProps = {
   email: string;
+  hasPasskeys: boolean;
 };
 
-export const PendingView = ({ email }: PendingViewProps) => {
+export const PendingView = ({ email, hasPasskeys }: PendingViewProps) => {
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -87,14 +88,16 @@ export const PendingView = ({ email }: PendingViewProps) => {
             </ul>
           </div>
 
-          <Button
-            variant="primary"
-            size="lg"
-            className="w-full"
-            onPress={() => router.push("/admin/setup-passkey")}
-          >
-            Setup Passkey While Waiting
-          </Button>
+          {!hasPasskeys && (
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full"
+              onPress={() => router.push("/admin/setup-passkey")}
+            >
+              Setup Passkey While Waiting
+            </Button>
+          )}
 
           <Button
             variant="secondary"

@@ -27,7 +27,7 @@ export const DashboardContent = () => {
         <DashboardCard
           title="RSVPs"
           description="View and manage guest responses"
-          href="/admin/rsvps"
+          href="/admin/rsvp"
           count="Coming soon"
         />
         <DashboardCard
