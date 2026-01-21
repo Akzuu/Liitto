@@ -116,14 +116,31 @@ export const PinInput = () => {
 
     const formattedCode = `${code[0]}${code[1]}${code[2]}${code[3]}-${code[4]}${code[5]}${code[6]}${code[7]}`;
 
-    // For now, always succeed and navigate to invitation page
-    console.log("Login attempt:", { code: formattedCode });
+    try {
+      const response = await fetch("/api/auth/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: formattedCode }),
+      });
 
-    // Store the code in sessionStorage for the invitation page
-    sessionStorage.setItem("invitationCode", formattedCode);
+      const data = await response.json();
 
-    // Navigate to invitation page
-    router.push("/invitation");
+      if (!response.ok) {
+        setError(
+          data.error || "Koodin varmistus epäonnistui. Yritä uudelleen.",
+        );
+        return;
+      }
+
+      // Session cookie is automatically set by the API
+      // Navigate to invitation page
+      router.push("/invitation");
+    } catch (error) {
+      console.error("Error validating code:", error);
+      setError("Koodin varmistus epäonnistui. Yritä uudelleen.");
+    }
   };
 
   return (

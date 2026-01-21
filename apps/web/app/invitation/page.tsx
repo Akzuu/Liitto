@@ -1,15 +1,14 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getInvitationDetails } from "@/lib/invitation-data";
+import { InvitationPageClient } from "./components/invitation-page-client";
 
-import { Spinner } from "@heroui/react";
-import { InvitationContent } from "./components/invitation-content";
-import { useInvitationAuth } from "./hooks/use-invitation-auth";
+export default async function InvitationPage() {
+  const details = await getInvitationDetails();
 
-export default function InvitationPage() {
-  const { code, handleLogout } = useInvitationAuth();
-
-  if (!code) {
-    return <Spinner />;
+  // Redirect to home if no valid session
+  if (!details) {
+    redirect("/");
   }
 
-  return <InvitationContent code={code} onLogout={handleLogout} />;
+  return <InvitationPageClient details={details} />;
 }

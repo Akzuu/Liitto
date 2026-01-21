@@ -1,56 +1,117 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import {
+  getSessionCookieName,
+  validateSessionToken,
+} from "./lib/invitation-session";
 
-export const proxy = async (req: NextRequest) => {
-  const path = req.nextUrl.pathname;
+/**
+ * Validate invitation session for /invitation routes
+ * Returns NextResponse if validation fails, null if valid
+ */
+const validateInvitationSession = async (
+  req: NextRequest,
+): Promise<NextResponse | null> => {
+  const token = req.cookies.get(getSessionCookieName())?.value;
 
-  // Check if this is an admin-only route
-  // Admin-only routes: /admin/dashboard, /admin/users, /admin/passkeys, etc.
-  // /admin/pending is protected by layout but not in this list (accessible to pending users)
-  // Non-protected: /admin (login), /admin/register, /admin/setup-passkey
-  const adminOnlyRoutes = [
-    "/admin/dashboard",
-    "/admin/users",
-    "/admin/passkeys",
-    "/admin/invitations",
-    "/admin/rsvp",
-    "/admin/guests",
-    "/admin/settings",
-  ];
+  if (!token) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
 
-  const isAdminOnlyRoute = adminOnlyRoutes.some((route) =>
+  const session = await validateSessionToken(token);
+
+  if (!session) {
+    const response = NextResponse.redirect(new URL("/", req.url));
+    response.cookies.delete(getSessionCookieName());
+    return response;
+  }
+
+  return null; // Valid session, continue
+};
+
+/**
+ * Routes that require admin role
+ * Note: /admin/pending is accessible to pending users (not in this list)
+ */
+const ADMIN_ONLY_ROUTES = [
+  "/admin/dashboard",
+  "/admin/users",
+  "/admin/passkeys",
+  "/admin/invitations",
+  "/admin/rsvp",
+  "/admin/guests",
+  "/admin/settings",
+];
+
+/**
+ * Validate admin authentication for /admin routes
+ * Returns NextResponse if validation fails, null if valid
+ */
+const validateAdminAuth = async (
+  req: NextRequest,
+  path: string,
+): Promise<NextResponse | null> => {
+  const isAdminOnlyRoute = ADMIN_ONLY_ROUTES.some((route) =>
     path.startsWith(route),
   );
 
   if (!isAdminOnlyRoute) {
-    return NextResponse.next();
+    return null; // Not an admin-only route, continue
   }
 
-  // Get session from Better Auth
   const session = await auth.api.getSession({
     headers: req.headers,
   });
 
-  // Redirect to login if not authenticated
   if (!session?.user) {
     const loginUrl = new URL("/admin", req.url);
     loginUrl.searchParams.set("error", "unauthorized");
     return NextResponse.redirect(loginUrl);
   }
 
-  // Check if user has admin role
   if (session.user.role !== "admin") {
-    // Redirect pending users to pending approval page (not in admin-only list)
+    // Redirect pending users to pending approval page
     if (session.user.role === "pending") {
-      const pendingUrl = new URL("/admin/pending", req.url);
-      return NextResponse.redirect(pendingUrl);
+      return NextResponse.redirect(new URL("/admin/pending", req.url));
     }
 
-    // Other roles (or no role) are unauthorized
+    // Other roles are unauthorized
     const loginUrl = new URL("/admin", req.url);
     loginUrl.searchParams.set("error", "unauthorized");
     return NextResponse.redirect(loginUrl);
+  }
+
+  return null; // Valid admin session, continue
+};
+
+/**
+ * Main proxy middleware - routes requests to appropriate validators
+ */
+export const proxy = async (req: NextRequest) => {
+  const path = req.nextUrl.pathname;
+
+  // Handle invitation routes
+  if (path.startsWith("/invitation")) {
+    try {
+      const response = await validateInvitationSession(req);
+      if (response) {
+        return response;
+      }
+      return NextResponse.next();
+    } catch (error) {
+      console.error("Invitation session validation error:", error);
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+  }
+
+  // Handle admin routes
+  if (path.startsWith("/admin")) {
+    const response = await validateAdminAuth(req, path);
+    if (response) {
+      return response;
+    }
+    return NextResponse.next();
   }
 
   return NextResponse.next();

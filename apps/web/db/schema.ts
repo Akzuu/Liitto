@@ -23,6 +23,8 @@ export const invitation = pgTable("invitation", {
 export const invitationRelations = relations(invitation, ({ many, one }) => ({
   guests: many(guest),
   rsvp: one(rsvp),
+  sessions: many(invitationSession),
+  verificationCodes: many(emailVerificationCode),
 }));
 
 export const rsvp = pgTable("rsvp", {
@@ -66,6 +68,76 @@ export const guestRelations = relations(guest, ({ one }) => ({
     references: [invitation.id],
   }),
 }));
+
+// Invitation session table - for guest authentication
+export const invitationSession = pgTable(
+  "invitation_session",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    invitationId: uuid("invitation_id")
+      .notNull()
+      .references(() => invitation.id, { onDelete: "cascade" }),
+    token: varchar("token", { length: 255 }).notNull().unique(),
+    emailVerified: boolean("email_verified").notNull().default(false),
+    expiresAt: timestamp("expires_at", {
+      mode: "date",
+      withTimezone: true,
+    }).notNull(),
+    lastAccessedAt: timestamp("last_accessed_at", {
+      mode: "date",
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("invitation_session_token_idx").on(table.token),
+    index("invitation_session_invitationId_idx").on(table.invitationId),
+  ],
+);
+
+export const invitationSessionRelations = relations(
+  invitationSession,
+  ({ one }) => ({
+    invitation: one(invitation, {
+      fields: [invitationSession.invitationId],
+      references: [invitation.id],
+    }),
+  }),
+);
+
+// Email verification code table - for RSVP editing
+export const emailVerificationCode = pgTable(
+  "email_verification_code",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    invitationId: uuid("invitation_id")
+      .notNull()
+      .references(() => invitation.id, { onDelete: "cascade" }),
+    email: varchar("email", { length: 255 }).notNull(),
+    code: varchar("code", { length: 255 }).notNull(), // Hashed 6-digit code
+    attempts: integer("attempts").notNull().default(0),
+    expiresAt: timestamp("expires_at").notNull(),
+    verifiedAt: timestamp("verified_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("email_verification_code_invitationId_idx").on(table.invitationId),
+  ],
+);
+
+export const emailVerificationCodeRelations = relations(
+  emailVerificationCode,
+  ({ one }) => ({
+    invitation: one(invitation, {
+      fields: [emailVerificationCode.invitationId],
+      references: [invitation.id],
+    }),
+  }),
+);
 
 // Wedding settings table (single row)
 export const weddingSettings = pgTable("wedding_settings", {
@@ -115,7 +187,7 @@ export const session = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (table) => [index("session_userId_idx").on(table.userId)]
+  (table) => [index("session_userId_idx").on(table.userId)],
 );
 
 export const account = pgTable(
@@ -139,7 +211,7 @@ export const account = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("account_userId_idx").on(table.userId)]
+  (table) => [index("account_userId_idx").on(table.userId)],
 );
 
 export const verification = pgTable(
@@ -155,7 +227,7 @@ export const verification = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("verification_identifier_idx").on(table.identifier)]
+  (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
 export const passkey = pgTable(
@@ -178,7 +250,7 @@ export const passkey = pgTable(
   (table) => [
     index("passkey_userId_idx").on(table.userId),
     index("passkey_credentialID_idx").on(table.credentialID),
-  ]
+  ],
 );
 
 export const userRelations = relations(user, ({ many }) => ({

@@ -1,9 +1,17 @@
 import { Card, CardHeader } from "@heroui/react";
 import { LogIn } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getInvitationSession } from "@/lib/invitation-data";
 import { PinInput } from "../components/pin-input";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // If user already has a valid session, redirect to invitation page
+  const session = await getInvitationSession();
+  if (session) {
+    redirect("/invitation");
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-pink-50 to-blue-50 relative">
       <Card className="w-full max-w-lg shadow-xl pt-4">

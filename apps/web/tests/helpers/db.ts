@@ -1,15 +1,20 @@
+import { createHash } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { db } from "@/db";
 import {
   account,
+  emailVerificationCode,
   guest,
   invitation,
+  invitationSession,
   passkey,
   rsvp,
   session,
   user,
   verification,
 } from "@/db/schema";
+import type { SessionData } from "@/lib/invitation-session";
+import { createInvitationSession } from "@/lib/invitation-session";
 
 export const createTestInvitation = async (
   overrides?: Partial<typeof invitation.$inferInsert>,
@@ -76,8 +81,45 @@ export const createTestRsvp = async (
   return rsvpData;
 };
 
+/**
+ * Create a test invitation session
+ * Returns both the session data and the unhashed token
+ */
+export const createTestInvitationSession = async (
+  invitationId: string,
+): Promise<{ token: string; session: SessionData }> => {
+  return await createInvitationSession(invitationId);
+};
+
+/**
+ * Create a test email verification code
+ * Returns the unhashed code for testing
+ */
+export const createTestVerificationCode = async (
+  invitationId: string,
+  email: string,
+): Promise<{ code: string; hashedCode: string }> => {
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedCode = createHash("sha256").update(code).digest("hex");
+
+  const expiresAt = new Date();
+  expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+
+  await db.insert(emailVerificationCode).values({
+    invitationId,
+    email,
+    code: hashedCode,
+    expiresAt,
+    attempts: 0,
+  });
+
+  return { code, hashedCode };
+};
+
 export const cleanDatabase = async () => {
-  // Clean wedding-related tables
+  // Clean invitation-related tables
+  await db.delete(emailVerificationCode);
+  await db.delete(invitationSession);
   await db.delete(rsvp);
   await db.delete(guest);
   await db.delete(invitation);
