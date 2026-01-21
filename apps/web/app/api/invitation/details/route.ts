@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { invitation } from "@/db/schema";
 import { withInvitationSession } from "@/lib/invitation-session";

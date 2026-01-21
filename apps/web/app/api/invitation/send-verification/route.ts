@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { rsvp } from "@/db/schema";
 import { createVerificationCode } from "@/lib/email-verification";

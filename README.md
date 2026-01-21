@@ -2,23 +2,18 @@
 
 Wedding invitation platform built with Next.js and PostgreSQL.
 
-Around 90 % of the code has been vibe coded. While this project serves an actual purpose, it is also a testing ground for
-AI assisted development.
+Around 90 % of the code has been vibe coded. While this project serves an actual purpose, it is also a testing ground for AI assisted development.
+
+## Features
+
+- **Guest Invitations**: Code-based authentication (XXXX-XXXX format) with server-side sessions
+- **Email Verification**: 6-digit codes for accessing RSVP details
+- **Admin Dashboard**: Better Auth with passkeys
+- **RSVP Management**: Submit and edit responses with email verification
+- **PostgreSQL + Drizzle ORM** for type-safe database access
 
 ## Authentication
 
-**Technology:** Better Auth with passkeys
+**Guest:** 8-character invitation codes create secure sessions (30-day expiry). Email verification required to view/edit existing RSVPs.
 
-**Route Protection:** Three-layer system
-
-1. **Proxy middleware** - Blocks admin-only routes for non-admin users
-2. **Protected layout** - Verifies session exists for all authenticated routes
-3. **Data Access Layer (DAL)** - Centralized session verification for components
-
-**Route types:**
-
-- Admin-only: Dashboard, users, guests, settings (requires admin role)
-- Authenticated: Pending approval page, setup passkey (requires login only)
-- Public: Login, register, wedding info
-
-The proxy handles role-based redirects, while the layout ensures authentication. Routes under `(protected)` group automatically get session context via `AuthProvider`.
+**Admin:** Better Auth with passkeys. Three-layer protection: proxy middleware, protected layouts, and data access layer (DAL). Routes under `(protected)` group get automatic session context.
