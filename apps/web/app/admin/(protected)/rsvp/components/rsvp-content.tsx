@@ -1,7 +1,14 @@
 "use client";
 
-import { Card } from "@heroui/react";
-import { Bus, CheckCircle2, Users, XCircle } from "lucide-react";
+import { Card, Chip } from "@heroui/react";
+import {
+  Bus,
+  Camera,
+  CheckCircle2,
+  Users,
+  Utensils,
+  XCircle,
+} from "lucide-react";
 import type { guest, invitation, rsvp } from "@/db/schema";
 import { AdminLayout } from "../../components/admin-layout";
 import { ExportRsvpButton } from "./export-rsvp-button";
@@ -80,8 +87,66 @@ export const RsvpContent = ({ invitations, guests }: RsvpContentProps) => {
         />
       </div>
 
-      {/* Export Button */}
-      <div className="mb-6 flex justify-end">
+      {/* Export Button and Legend */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm font-medium text-foreground-muted">
+            Status indicators:
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <Chip
+              color="success"
+              variant="soft"
+              size="sm"
+              className="text-green-900 dark:text-green-100"
+            >
+              Attending
+            </Chip>
+            <Chip
+              color="danger"
+              variant="soft"
+              size="sm"
+              className="text-red-900 dark:text-red-100"
+            >
+              Not Attending
+            </Chip>
+            <Chip
+              color="warning"
+              variant="soft"
+              size="sm"
+              className="text-amber-900 dark:text-amber-100"
+            >
+              No Response
+            </Chip>
+            <Chip
+              color="accent"
+              variant="soft"
+              size="sm"
+              className="text-blue-900 dark:text-blue-100"
+            >
+              <Bus className="h-3 w-3" />
+              Bus Ride Requested
+            </Chip>
+            <Chip
+              color="warning"
+              variant="soft"
+              size="sm"
+              className="text-amber-900 dark:text-amber-100"
+            >
+              <Utensils className="h-3 w-3" />
+              Dietary Restrictions
+            </Chip>
+            <Chip
+              color="warning"
+              variant="soft"
+              size="sm"
+              className="text-amber-900 dark:text-amber-100"
+            >
+              <Camera className="h-3 w-3" />
+              Blur Request
+            </Chip>
+          </div>
+        </div>
         <ExportRsvpButton invitations={invitations} guests={guests} />
       </div>
 

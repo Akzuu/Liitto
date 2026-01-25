@@ -5,6 +5,7 @@ import {
   AlertCircle,
   Bus,
   Calendar,
+  Camera,
   Check,
   Mail,
   MessageSquare,
@@ -63,6 +64,9 @@ export const RsvpList = ({ invitations, guests }: RsvpListProps) => {
               (g) =>
                 g.dietaryRestrictions && g.dietaryRestrictions.trim() !== "",
             );
+            const hasBlurRequest = invitationGuests.some(
+              (g) => g.photographyConsent,
+            );
             return (
               <div
                 key={inv.invitation.id}
@@ -77,24 +81,51 @@ export const RsvpList = ({ invitations, guests }: RsvpListProps) => {
                     <Chip
                       color={inv.rsvp?.attending ? "success" : "danger"}
                       variant="soft"
+                      className={
+                        inv.rsvp?.attending
+                          ? "text-green-900 dark:text-green-100"
+                          : "text-red-900 dark:text-red-100"
+                      }
                     >
                       {inv.rsvp?.attending ? "Attending" : "Not Attending"}
                     </Chip>
                   ) : (
-                    <Chip color="warning" variant="soft">
+                    <Chip
+                      color="warning"
+                      variant="soft"
+                      className="text-amber-900 dark:text-amber-100"
+                    >
                       No Response
                     </Chip>
                   )}
                   {inv.rsvp?.needsBusRide && (
-                    <Chip color="accent" variant="soft">
+                    <Chip
+                      color="accent"
+                      variant="soft"
+                      className="text-blue-900 dark:text-blue-100"
+                    >
                       <Bus className="h-3 w-3" />
                       Bus
                     </Chip>
                   )}
                   {hasDietaryRestrictions && (
-                    <Chip color="warning" variant="soft">
+                    <Chip
+                      color="warning"
+                      variant="soft"
+                      className="text-amber-900 dark:text-amber-100"
+                    >
                       <Utensils className="h-3 w-3" />
                       Dietary
+                    </Chip>
+                  )}
+                  {hasBlurRequest && (
+                    <Chip
+                      color="warning"
+                      variant="soft"
+                      className="text-amber-900 dark:text-amber-100"
+                    >
+                      <Camera className="h-3 w-3" />
+                      Blur Request
                     </Chip>
                   )}
                 </div>
