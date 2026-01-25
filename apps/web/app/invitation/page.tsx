@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getInvitationDetails } from "@/lib/invitation-data";
+import { getWeddingSettings } from "@/lib/wedding-settings";
 import { InvitationPageClient } from "./components/invitation-page-client";
 
 export default async function InvitationPage() {
@@ -10,5 +11,10 @@ export default async function InvitationPage() {
     redirect("/");
   }
 
-  return <InvitationPageClient details={details} />;
+  // Fetch wedding settings for event details and schedule
+  const weddingSettings = await getWeddingSettings();
+
+  return (
+    <InvitationPageClient details={details} weddingSettings={weddingSettings} />
+  );
 }

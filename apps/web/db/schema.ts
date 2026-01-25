@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  json,
   pgTable,
   text,
   timestamp,
@@ -139,16 +140,23 @@ export const emailVerificationCodeRelations = relations(
   }),
 );
 
+// Type for schedule items
+export type ScheduleItem = {
+  time: string;
+  event: string;
+};
+
 // Wedding settings table (single row)
 export const weddingSettings = pgTable("wedding_settings", {
   id: uuid("id").defaultRandom().primaryKey(),
   rsvpDeadline: varchar("rsvp_deadline", { length: 20 }).notNull(),
   weddingDate: varchar("wedding_date", { length: 20 }),
+  ceremonyTime: varchar("ceremony_time", { length: 50 }),
+  venueName: varchar("venue_name", { length: 255 }),
+  venueAddress: text("venue_address"),
+  schedule: json("schedule").$type<ScheduleItem[]>(),
   brideName: varchar("bride_name", { length: 255 }),
   groomName: varchar("groom_name", { length: 255 }),
-  venue: text("venue"),
-  ceremonyTime: varchar("ceremony_time", { length: 50 }),
-  receptionTime: varchar("reception_time", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

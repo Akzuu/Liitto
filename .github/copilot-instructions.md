@@ -283,6 +283,127 @@ pnpm build        # Build for production
   - **Presentation Layer**: Components that only handle UI/display, receive all data via props
   - **Data Layer**: Handles queries, API calls, state management, data fetching
   - Presentation components should be agnostic to where data comes from
+  - **CRITICAL: Server Components for data fetching, Client Components for UI/interaction**
+    - ✅ Server Component fetches data from database, passes to Client Component as props
+    - ✅ Client Component uses `router.refresh()` after mutations to trigger server re-fetch
+    - ❌ Client Component fetching its own data via API calls in `useEffect`
+    - ❌ Mixing data fetching logic inside presentation components
+
+**Data Fetching Patterns:**
+
+```tsx
+// ✅ GOOD - Server Component fetches, Client Component receives
+// app/admin/settings/page.tsx (Server Component)
+export default async function SettingsPage() {
+  const settings = await db.select().from(weddingSettings).limit(1);
+  return <SettingsContent initialSettings={settings} />;
+}
+
+// components/settings-content.tsx (Client Component)
+("use client");
+export const SettingsContent = ({ initialSettings }) => {
+  const router = useRouter();
+  const [data, setData] = useState(initialSettings);
+
+  const handleSave = async () => {
+    await fetch("/api/settings", { method: "PUT", body: JSON.stringify(data) });
+    router.refresh(); // Triggers server re-fetch
+  };
+
+  return <form>{/* UI */}</form>;
+};
+
+// ❌ AVOID - Client Component fetching its own data
+("use client");
+export const SettingsContent = () => {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/settings").then(setData); // ❌ Don't do this
+  }, []);
+
+  return <form>{/* UI */}</form>;
+};
+```
+
+**API Design Patterns:**
+
+- **Require explicit IDs for updates** - No guessing which row to update
+  - Always send the record ID in PUT/PATCH requests
+  - Server validates ID exists before updating
+  - Return 404 if ID not found, never fall back to defaults
+- **No automatic defaults** - Don't create records if they don't exist
+  - GET endpoints return 404 if data missing
+  - Require explicit seeding or creation endpoints
+- **No console.log in production code** - Remove all debugging logs before committing
+
+```tsx
+// ✅ GOOD - Explicit ID required
+const updateSettingsSchema = z.object({
+  id: z.string().uuid(), // Required, not optional
+  // ... other fields
+});
+
+export const PUT = async (req: NextRequest) => {
+  const { id, ...data } = await req.json();
+  const [existing] = await db
+    .select()
+    .from(settings)
+    .where(eq(settings.id, id));
+
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const [updated] = await db
+    .update(settings)
+    .set(data)
+    .where(eq(settings.id, id))
+    .returning();
+  return NextResponse.json({ settings: updated });
+};
+
+// ❌ AVOID - Guessing which row to update
+export const PUT = async (req: NextRequest) => {
+  const data = await req.json();
+  // ❌ No ID, using .limit(1) is non-deterministic
+  const [existing] = await db.select().from(settings).limit(1);
+  // ❌ Creating defaults if missing
+  if (!existing) {
+    return await db.insert(settings).values(defaultSettings);
+  }
+};
+```
+
+**Hydration Issues:**
+
+- **Client-only rendering for randomness** - Use `useEffect` + `isClient` flag when using `crypto.randomUUID()` or `Date.now()`
+
+```tsx
+// ✅ GOOD - Client-only rendering
+export const MyForm = ({ initialData }) => {
+  const [items, setItems] = useState([]);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setItems(initialData.map((item) => ({ ...item, id: crypto.randomUUID() })));
+  }, []);
+
+  if (!isClient) return null;
+
+  return <form>{/* UI */}</form>;
+};
+
+// ❌ AVOID - Server/client mismatch
+export const MyForm = ({ initialData }) => {
+  // ❌ crypto.randomUUID() runs on both server and client with different values
+  const [items, setItems] = useState(
+    initialData.map((item) => ({ ...item, id: crypto.randomUUID() })),
+  );
+  return <form>{/* UI */}</form>;
+};
+```
 
 Example structure - Conditional rendering without large JSX blocks:
 

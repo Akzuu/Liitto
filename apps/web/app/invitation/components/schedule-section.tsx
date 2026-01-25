@@ -1,24 +1,35 @@
+import type { ScheduleItem } from "@/db/schema";
+
 type ScheduleSectionProps = {
+  schedule?: ScheduleItem[] | null;
+  ceremonyTime?: string | null;
   className?: string;
 };
 
-export const ScheduleSection = ({ className }: ScheduleSectionProps) => {
-  const schedule = [
-    { time: "14:00", event: "Vihkiminen" },
-    { time: "15:00", event: "Kuvailu ja vastaanotto" },
-    { time: "16:00", event: "Hääjuhla alkaa" },
-    { time: "17:00", event: "Illallinen" },
-    { time: "19:00", event: "Puheet ja kakun leikkaus" },
-    { time: "20:00", event: "Ensimmäinen tanssi" },
-    { time: "20:30", event: "???" },
+export const ScheduleSection = ({
+  schedule,
+  ceremonyTime,
+  className,
+}: ScheduleSectionProps) => {
+  const ceremonyItem: ScheduleItem | null = ceremonyTime
+    ? { time: ceremonyTime, event: "Vihkiminen" }
+    : null;
+
+  const allItems = [
+    ...(ceremonyItem ? [ceremonyItem] : []),
+    ...(schedule || []),
   ];
+
+  if (allItems.length === 0) {
+    return null;
+  }
 
   return (
     <section className={className}>
       <h2 className="text-2xl font-semibold text-gray-900">Ohjelma</h2>
       <div className="space-y-2 text-gray-700">
-        {schedule.map((item) => (
-          <p key={item.time}>
+        {allItems.map((item, index) => (
+          <p key={`${item.time}-${index}`}>
             {item.time} - {item.event}
           </p>
         ))}

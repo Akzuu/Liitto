@@ -57,6 +57,13 @@
       "when": 1769015180281,
       "tag": "0007_elite_quasar",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1769326147504,
+      "tag": "0008_cynical_the_leader",
+      "breakpoints": true
     }
   ]
 }

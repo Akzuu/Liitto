@@ -14,48 +14,44 @@ export const GET = async () => {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get or create settings (should only be one row)
-    let [settings] = await db.select().from(weddingSettings).limit(1);
+    const [settings] = await db
+      .select()
+      .from(weddingSettings)
+      .orderBy(weddingSettings.createdAt)
+      .limit(1);
 
     if (!settings) {
-      // Create default settings if none exist
-      [settings] = await db
-        .insert(weddingSettings)
-        .values({
-          rsvpDeadline: "15.3.2026",
-          weddingDate: "",
-          brideName: "",
-          groomName: "",
-          venue: "",
-          ceremonyTime: "",
-          receptionTime: "",
-        })
-        .returning();
-    }
-
-    if (!settings) {
-      throw new Error("Failed to create default settings");
+      return NextResponse.json(
+        { error: "Settings not found" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({ settings });
-  } catch (error) {
-    console.error("Error fetching settings:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch settings" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };
 
 // PUT update wedding settings
+const scheduleItemSchema = z.object({
+  time: z.string(),
+  event: z.string(),
+});
+
 const updateSettingsSchema = z.object({
+  id: z.string().uuid(),
   rsvpDeadline: z.string().min(1, "RSVP deadline is required"),
   weddingDate: z.string().optional(),
+  ceremonyTime: z.string().optional(),
+  venueName: z.string().optional(),
+  venueAddress: z.string().optional(),
+  schedule: z.array(scheduleItemSchema).optional(),
   brideName: z.string().optional(),
   groomName: z.string().optional(),
-  venue: z.string().optional(),
-  ceremonyTime: z.string().optional(),
-  receptionTime: z.string().optional(),
 });
 
 export const PUT = async (req: NextRequest) => {
@@ -72,42 +68,52 @@ export const PUT = async (req: NextRequest) => {
     if (!result.success) {
       return NextResponse.json(
         { error: "Invalid input", details: result.error.issues },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // Get existing settings
-    const [existing] = await db.select().from(weddingSettings).limit(1);
+    // Get existing settings by ID
+    const [existing] = await db
+      .select()
+      .from(weddingSettings)
+      .where(eq(weddingSettings.id, result.data.id))
+      .limit(1);
 
-    let updated: typeof weddingSettings.$inferSelect | undefined;
-    if (existing) {
-      // Update existing settings
-      [updated] = await db
-        .update(weddingSettings)
-        .set({
-          ...result.data,
-          updatedAt: new Date(),
-        })
-        .where(eq(weddingSettings.id, existing.id))
-        .returning();
-    } else {
-      // Create new settings
-      [updated] = await db
-        .insert(weddingSettings)
-        .values(result.data)
-        .returning();
+    if (!existing) {
+      return NextResponse.json(
+        { error: "Settings not found" },
+        { status: 404 },
+      );
     }
+
+    // Update existing settings - explicitly set each field
+    const updateData = {
+      rsvpDeadline: result.data.rsvpDeadline,
+      weddingDate: result.data.weddingDate ?? existing.weddingDate,
+      ceremonyTime: result.data.ceremonyTime ?? existing.ceremonyTime,
+      venueName: result.data.venueName ?? existing.venueName,
+      venueAddress: result.data.venueAddress ?? existing.venueAddress,
+      schedule: result.data.schedule ?? existing.schedule,
+      brideName: result.data.brideName ?? existing.brideName,
+      groomName: result.data.groomName ?? existing.groomName,
+      updatedAt: new Date(),
+    };
+
+    const [updated] = await db
+      .update(weddingSettings)
+      .set(updateData)
+      .where(eq(weddingSettings.id, existing.id))
+      .returning();
 
     if (!updated) {
       throw new Error("Failed to update settings");
     }
 
     return NextResponse.json({ settings: updated });
-  } catch (error) {
-    console.error("Error updating settings:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to update settings" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };
