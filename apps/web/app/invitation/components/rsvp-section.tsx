@@ -295,9 +295,9 @@ export const RsvpSection = ({
               <div className="flex items-start gap-3">
                 <Checkbox
                   id={`guest-${index}-photo`}
-                  isSelected={guest.photographyConsent}
+                  isSelected={!guest.photographyConsent}
                   onChange={(selected) =>
-                    updateGuest(index, "photographyConsent", selected)
+                    updateGuest(index, "photographyConsent", !selected)
                   }
                 >
                   <Checkbox.Control>
