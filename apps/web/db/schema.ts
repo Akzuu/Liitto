@@ -37,6 +37,7 @@ export const rsvp = pgTable("rsvp", {
   email: varchar("email", { length: 255 }).notNull(),
   attending: boolean("attending").notNull(),
   guestCount: integer("guest_count").notNull().default(0),
+  needsBusRide: boolean("needs_bus_ride").default(false),
   message: text("message"),
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -157,6 +158,10 @@ export const weddingSettings = pgTable("wedding_settings", {
   schedule: json("schedule").$type<ScheduleItem[]>(),
   brideName: varchar("bride_name", { length: 255 }),
   groomName: varchar("groom_name", { length: 255 }),
+  busTransportEnabled: boolean("bus_transport_enabled")
+    .default(false)
+    .notNull(),
+  busTransportDescription: text("bus_transport_description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

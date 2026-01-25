@@ -50,6 +50,7 @@ export const InvitationPageClient = ({
       <EmailVerification
         onVerified={handleVerified}
         onResend={sendVerificationCode}
+        onLogout={handleLogout}
       />
     );
   }
@@ -57,7 +58,10 @@ export const InvitationPageClient = ({
   return (
     <InvitationContent
       code={details.invitation.code}
+      maxGuests={details.invitation.maxGuests}
       weddingSettings={weddingSettings}
+      existingRsvp={details.rsvp}
+      existingGuests={details.guests}
       onLogout={handleLogout}
     />
   );

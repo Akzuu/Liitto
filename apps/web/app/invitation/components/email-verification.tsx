@@ -1,11 +1,12 @@
 "use client";
 
 import { Button, Card, CardContent, CardHeader } from "@heroui/react";
-import { type KeyboardEvent, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 type EmailVerificationProps = {
   onVerified: () => void;
   onResend: () => Promise<void>;
+  onLogout?: () => void;
 };
 
 const CODE_INPUTS = [
@@ -20,11 +21,13 @@ const CODE_INPUTS = [
 export const EmailVerification = ({
   onVerified,
   onResend,
+  onLogout,
 }: EmailVerificationProps) => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [initialSendDone, setInitialSendDone] = useState(false);
   const inputRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
@@ -33,6 +36,14 @@ export const EmailVerification = ({
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
   ];
+
+  // Automatically send verification code on mount
+  useEffect(() => {
+    if (!initialSendDone) {
+      setInitialSendDone(true);
+      onResend();
+    }
+  }, [initialSendDone, onResend]);
 
   const handleCodeChange = (index: number, value: string) => {
     // Only allow digits
@@ -199,6 +210,18 @@ export const EmailVerification = ({
             >
               {isResending ? "Lähetetään..." : "Lähetä koodi uudelleen"}
             </Button>
+
+            {onLogout && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="w-full mt-2"
+                onPress={onLogout}
+              >
+                Kirjaudu ulos
+              </Button>
+            )}
           </form>
         </CardContent>
       </Card>

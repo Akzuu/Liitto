@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@heroui/react";
-import type { weddingSettings } from "@/db/schema";
+import type { guest, rsvp, weddingSettings } from "@/db/schema";
 import { EventDetails } from "./event-details";
 import { InvitationHeader } from "./invitation-header";
 import { LogoutSection } from "./logout-section";
@@ -8,13 +8,19 @@ import { ScheduleSection } from "./schedule-section";
 
 type InvitationContentProps = {
   code: string;
+  maxGuests: number;
   weddingSettings: typeof weddingSettings.$inferSelect | null;
+  existingRsvp: typeof rsvp.$inferSelect | null;
+  existingGuests: Array<typeof guest.$inferSelect> | null;
   onLogout: () => void;
 };
 
 export const InvitationContent = ({
   code,
+  maxGuests,
   weddingSettings,
+  existingRsvp,
+  existingGuests,
   onLogout,
 }: InvitationContentProps) => {
   return (
@@ -35,7 +41,13 @@ export const InvitationContent = ({
               ceremonyTime={weddingSettings?.ceremonyTime}
               className="space-y-4"
             />
-            <RsvpSection className="space-y-4" />
+            <RsvpSection
+              className="space-y-4"
+              maxGuests={maxGuests}
+              weddingSettings={weddingSettings}
+              existingRsvp={existingRsvp}
+              existingGuests={existingGuests}
+            />
             <LogoutSection onLogout={onLogout} />
           </CardContent>
         </Card>

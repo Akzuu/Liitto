@@ -64,6 +64,20 @@
       "when": 1769326147504,
       "tag": "0008_cynical_the_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1769354294252,
+      "tag": "0009_secret_drax",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1769355115742,
+      "tag": "0010_watery_zodiak",
+      "breakpoints": true
     }
   ]
 }

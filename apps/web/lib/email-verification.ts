@@ -4,7 +4,7 @@ import { emailVerificationCode } from "../db/schema";
 
 const CODE_EXPIRY_MINUTES = 15;
 const MAX_ATTEMPTS = 5;
-const MAX_SENDS_PER_HOUR = 3;
+const MAX_SENDS_PER_HOUR = 10;
 const VERIFICATION_CODE_LENGTH = 6;
 
 /**
@@ -224,6 +224,11 @@ export const validateVerificationCode = async (
     .update(emailVerificationCode)
     .set({ verifiedAt: new Date() })
     .where(eq(emailVerificationCode.id, record.id));
+
+  // Delete all verification codes for this invitation to reset rate limit
+  await db
+    .delete(emailVerificationCode)
+    .where(eq(emailVerificationCode.invitationId, invitationId));
 
   return { valid: true };
 };

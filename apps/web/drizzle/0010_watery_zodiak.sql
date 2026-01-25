@@ -1,0 +1,1 @@
+ALTER TABLE "rsvp" ADD COLUMN "needs_bus_ride" boolean DEFAULT false;

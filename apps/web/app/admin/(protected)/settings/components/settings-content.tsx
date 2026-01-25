@@ -3,10 +3,12 @@
 import {
   Alert,
   Button,
+  Checkbox,
   DateField,
   DateInputGroup,
   Input,
   Label,
+  TextArea,
   TextField,
 } from "@heroui/react";
 import type { DateValue } from "@internationalized/date";
@@ -47,6 +49,12 @@ export const SettingsContent = ({ initialSettings }: SettingsContentProps) => {
   >([]);
   const [brideName, setBrideName] = useState(initialSettings.brideName || "");
   const [groomName, setGroomName] = useState(initialSettings.groomName || "");
+  const [busTransportEnabled, setBusTransportEnabled] = useState(
+    initialSettings.busTransportEnabled || false,
+  );
+  const [busTransportDescription, setBusTransportDescription] = useState(
+    initialSettings.busTransportDescription || "",
+  );
 
   // Generate IDs on client-side only to avoid hydration mismatches
   const [isClient, setIsClient] = useState(false);
@@ -116,6 +124,8 @@ export const SettingsContent = ({ initialSettings }: SettingsContentProps) => {
         schedule: schedule.map(({ id, ...item }) => item),
         brideName,
         groomName,
+        busTransportEnabled,
+        busTransportDescription,
       };
 
       const response = await fetch("/api/admin/settings", {
@@ -310,6 +320,38 @@ export const SettingsContent = ({ initialSettings }: SettingsContentProps) => {
               </p>
             )}
           </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Bus Transportation</h3>
+
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="busTransportEnabled"
+              isSelected={busTransportEnabled}
+              onChange={setBusTransportEnabled}
+            >
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+            </Checkbox>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="busTransportEnabled">
+                Enable bus transportation question
+              </Label>
+            </div>
+          </div>
+
+          {busTransportEnabled && (
+            <TextField
+              name="busTransportDescription"
+              value={busTransportDescription}
+              onChange={setBusTransportDescription}
+            >
+              <Label>Bus Transportation Description</Label>
+              <TextArea placeholder="" rows={3} />
+            </TextField>
+          )}
         </div>
 
         <div className="space-y-4">

@@ -52,6 +52,8 @@ const updateSettingsSchema = z.object({
   schedule: z.array(scheduleItemSchema).optional(),
   brideName: z.string().optional(),
   groomName: z.string().optional(),
+  busTransportEnabled: z.boolean().optional(),
+  busTransportDescription: z.string().optional(),
 });
 
 export const PUT = async (req: NextRequest) => {
@@ -96,6 +98,10 @@ export const PUT = async (req: NextRequest) => {
       schedule: result.data.schedule ?? existing.schedule,
       brideName: result.data.brideName ?? existing.brideName,
       groomName: result.data.groomName ?? existing.groomName,
+      busTransportEnabled:
+        result.data.busTransportEnabled ?? existing.busTransportEnabled,
+      busTransportDescription:
+        result.data.busTransportDescription ?? existing.busTransportDescription,
       updatedAt: new Date(),
     };
 
