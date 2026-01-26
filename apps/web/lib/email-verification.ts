@@ -145,7 +145,7 @@ export const createVerificationCode = async (
     const cooldownSeconds = calculateCooldown(recentCodes.length - 1);
     const secondsSinceLastSend =
       (Date.now() - mostRecent.createdAt.getTime()) / 1000;
-    
+
     if (secondsSinceLastSend < cooldownSeconds) {
       const cooldownEndsAt = new Date(
         mostRecent.createdAt.getTime() + cooldownSeconds * 1000,

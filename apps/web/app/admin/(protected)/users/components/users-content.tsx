@@ -1,6 +1,7 @@
 "use client";
 
 import { Spinner } from "@heroui/react";
+import { AlertMessage } from "@/components/alert-message";
 import { AdminLayout } from "../../components/admin-layout";
 import type { User } from "../lib/user-actions";
 import { AdminUsersList } from "./admin-users-list";
@@ -27,11 +28,7 @@ export const UsersContent = ({
 }: UsersContentProps) => {
   return (
     <AdminLayout title="User Management">
-      {error && (
-        <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
-          {error}
-        </div>
-      )}
+      {error && <AlertMessage variant="error">{error}</AlertMessage>}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">

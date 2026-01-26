@@ -3,7 +3,7 @@ import { getInvitationDetails } from "@/lib/invitation-data";
 import { getWeddingSettings } from "@/lib/wedding-settings";
 import { InvitationPageClient } from "./components/invitation-page-client";
 
-export default async function InvitationPage() {
+const InvitationPage = async () => {
   const details = await getInvitationDetails();
 
   // Redirect to home if no valid session
@@ -17,4 +17,6 @@ export default async function InvitationPage() {
   return (
     <InvitationPageClient details={details} weddingSettings={weddingSettings} />
   );
-}
+};
+
+export default InvitationPage;

@@ -4,7 +4,7 @@ import { weddingSettings } from "@/db/schema";
 import { verifySession } from "@/lib/dal";
 import { SettingsContent } from "./components/settings-content";
 
-export default async function SettingsPage() {
+const SettingsPage = async () => {
   const session = await verifySession();
 
   if (!session?.user) {
@@ -28,4 +28,6 @@ export default async function SettingsPage() {
   }
 
   return <SettingsContent initialSettings={settings} />;
-}
+};
+
+export default SettingsPage;

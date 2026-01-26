@@ -1,4 +1,4 @@
-import { desc, eq, gte, and } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { emailVerificationCode, rsvp } from "@/db/schema";
@@ -51,7 +51,7 @@ export const GET = withInvitationSession(async (_, session) => {
   const cooldownSeconds = calculateCooldown(recentCodes.length - 1);
   const secondsSinceLastSend =
     (Date.now() - mostRecent.createdAt.getTime()) / 1000;
-  
+
   if (secondsSinceLastSend < cooldownSeconds) {
     const cooldownEndsAt = new Date(
       mostRecent.createdAt.getTime() + cooldownSeconds * 1000,
@@ -124,8 +124,10 @@ export const POST = withInvitationSession(async (_, session) => {
   // Use the same calculation as GET endpoint for consistency
   const nextCooldownSeconds = calculateCooldown(recentCodes.length - 1);
   const createdAt = verificationResult.createdAt ?? new Date();
-  const cooldownEndsAt = new Date(createdAt.getTime() + nextCooldownSeconds * 1000);
-  
+  const cooldownEndsAt = new Date(
+    createdAt.getTime() + nextCooldownSeconds * 1000,
+  );
+
   return NextResponse.json({
     success: true,
     cooldownEndsAt: cooldownEndsAt.toISOString(),

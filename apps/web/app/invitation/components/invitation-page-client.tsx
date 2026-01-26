@@ -37,10 +37,7 @@ export const InvitationPageClient = ({
 
   if (details.requiresEmailVerification) {
     return (
-      <EmailVerification
-        onVerified={handleVerified}
-        onLogout={handleLogout}
-      />
+      <EmailVerification onVerified={handleVerified} onLogout={handleLogout} />
     );
   }
 

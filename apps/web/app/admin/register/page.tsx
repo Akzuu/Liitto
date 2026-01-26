@@ -47,7 +47,7 @@ const AdminRegisterPage = () => {
             router.push("/admin/setup-passkey");
           },
         },
-      })
+      }),
     );
 
     if (err) {
@@ -67,11 +67,7 @@ const AdminRegisterPage = () => {
           Create your admin account
         </p>
 
-        {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
+        {error && <AlertMessage variant="error">{error}</AlertMessage>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

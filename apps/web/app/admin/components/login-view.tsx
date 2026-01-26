@@ -88,11 +88,7 @@ export const LoginView = () => {
           Sign in to access the admin panel
         </p>
 
-        {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
+        {error && <AlertMessage variant="error">{error}</AlertMessage>}
 
         {loginMode === "passkey" ? (
           <>

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getInvitationSession } from "@/lib/invitation-data";
 import { PinInput } from "../components/pin-input";
 
-export default async function HomePage() {
+const HomePage = async () => {
   // If user already has a valid session, redirect to invitation page
   const session = await getInvitationSession();
   if (session) {
@@ -33,4 +33,6 @@ export default async function HomePage() {
       </Link>
     </main>
   );
-}
+};
+
+export default HomePage;

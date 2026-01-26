@@ -3,6 +3,7 @@
 import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AlertMessage } from "@/components/alert-message";
 import { passkey, useSession } from "@/lib/auth-client";
 import { handleAsync } from "@/lib/error-handler";
 
@@ -30,7 +31,7 @@ const SetupPasskeyPage = () => {
             router.push(getRedirectPath());
           },
         },
-      })
+      }),
     );
 
     if (err) {
@@ -87,11 +88,7 @@ const SetupPasskeyPage = () => {
           </ul>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
+        {error && <AlertMessage variant="error">{error}</AlertMessage>}
 
         <div className="space-y-3">
           <Button

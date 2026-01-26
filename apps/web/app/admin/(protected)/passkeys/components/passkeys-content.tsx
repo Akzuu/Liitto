@@ -3,6 +3,7 @@
 import { Button, Disclosure } from "@heroui/react";
 import { Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
+import { AlertMessage } from "@/components/alert-message";
 import { passkey } from "@/lib/auth-client";
 import { AdminLayout } from "../../components/admin-layout";
 import { deletePasskey, type PasskeyListItem } from "../lib/passkey-actions";
@@ -100,17 +101,9 @@ export const PasskeysContent = ({
             </Disclosure>
           </div>
 
-          {error && (
-            <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
+          {error && <AlertMessage variant="error">{error}</AlertMessage>}
 
-          {success && (
-            <div className="mb-4 rounded bg-green-50 p-3 text-sm text-green-600">
-              {success}
-            </div>
-          )}
+          {success && <AlertMessage variant="success">{success}</AlertMessage>}
 
           <div className="mb-8 border-t pt-6">
             <h3 className="mb-4 text-lg font-semibold">Your Passkey</h3>

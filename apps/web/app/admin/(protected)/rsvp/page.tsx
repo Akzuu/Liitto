@@ -5,7 +5,7 @@ import { guest, invitation, rsvp } from "@/db/schema";
 import { verifySession } from "@/lib/dal";
 import { RsvpContent } from "./components/rsvp-content";
 
-export default async function RsvpPage() {
+const RsvpPage = async () => {
   const session = await verifySession();
 
   if (!session?.user) {
@@ -26,4 +26,6 @@ export default async function RsvpPage() {
   const guests = await db.select().from(guest);
 
   return <RsvpContent invitations={invitations} guests={guests} />;
-}
+};
+
+export default RsvpPage;
