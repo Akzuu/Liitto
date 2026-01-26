@@ -6,7 +6,6 @@ const CODE_EXPIRY_MINUTES = 15;
 const MAX_ATTEMPTS = 5;
 const MAX_SENDS_PER_HOUR = 10;
 const VERIFICATION_CODE_LENGTH = 6;
-const BASE_COOLDOWN_SECONDS = 60;
 
 /**
  * Calculate progressive cooldown based on recent send count
@@ -78,27 +77,6 @@ const hashCode = async (code: string): Promise<string> => {
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-};
-
-/**
- * Check rate limiting for verification code sends
- * Returns true if rate limit exceeded
- */
-const checkRateLimit = async (invitationId: string): Promise<boolean> => {
-  const oneHourAgo = new Date();
-  oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-
-  const recentCodes = await db
-    .select()
-    .from(emailVerificationCode)
-    .where(
-      and(
-        eq(emailVerificationCode.invitationId, invitationId),
-        gte(emailVerificationCode.createdAt, oneHourAgo),
-      ),
-    );
-
-  return recentCodes.length >= MAX_SENDS_PER_HOUR;
 };
 
 /**
@@ -223,7 +201,7 @@ export const validateVerificationCode = async (
         isNull(emailVerificationCode.verifiedAt),
       ),
     )
-    .orderBy(emailVerificationCode.createdAt)
+    .orderBy(desc(emailVerificationCode.createdAt))
     .limit(1);
 
   if (!record) {
