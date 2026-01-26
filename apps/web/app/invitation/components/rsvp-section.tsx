@@ -291,29 +291,31 @@ export const RsvpSection = ({
                 </Description>
               </TextField>
 
-              {/* Photography consent */}
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id={`guest-${index}-photo`}
-                  isSelected={!guest.photographyConsent}
-                  onChange={(selected) =>
-                    updateGuest(index, "photographyConsent", !selected)
-                  }
-                >
-                  <Checkbox.Control>
-                    <Checkbox.Indicator />
-                  </Checkbox.Control>
-                </Checkbox>
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor={`guest-${index}-photo`}>
-                    Haluan piilottaa kasvoni valokuvista
-                  </Label>
-                  <Description>
-                    Haluamme kunnioittaa yksityisyyttäsi, joten voimme piilottaa
-                    kasvosi jaettavista kuvista.
-                  </Description>
+              {/* Photography consent - only shown if enabled in settings */}
+              {weddingSettings?.photographyConsentEnabled && (
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id={`guest-${index}-photo`}
+                    isSelected={!guest.photographyConsent}
+                    onChange={(selected) =>
+                      updateGuest(index, "photographyConsent", !selected)
+                    }
+                  >
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                  </Checkbox>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor={`guest-${index}-photo`}>
+                      Haluan piilottaa kasvoni valokuvista
+                    </Label>
+                    <Description>
+                      Haluamme kunnioittaa yksityisyyttäsi, joten voimme
+                      piilottaa kasvosi jaettavista kuvista.
+                    </Description>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
 

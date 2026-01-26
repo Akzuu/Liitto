@@ -162,6 +162,9 @@ export const weddingSettings = pgTable("wedding_settings", {
     .default(false)
     .notNull(),
   busTransportDescription: text("bus_transport_description"),
+  photographyConsentEnabled: boolean("photography_consent_enabled")
+    .default(false)
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

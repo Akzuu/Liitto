@@ -1,0 +1,1 @@
+ALTER TABLE "wedding_settings" ADD COLUMN "photography_consent_enabled" boolean DEFAULT false NOT NULL;

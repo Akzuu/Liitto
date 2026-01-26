@@ -78,6 +78,13 @@
       "when": 1769355115742,
       "tag": "0010_watery_zodiak",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1769445116473,
+      "tag": "0011_fair_hitman",
+      "breakpoints": true
     }
   ]
 }

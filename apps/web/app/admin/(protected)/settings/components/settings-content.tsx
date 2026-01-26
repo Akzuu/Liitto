@@ -55,6 +55,9 @@ export const SettingsContent = ({ initialSettings }: SettingsContentProps) => {
   const [busTransportDescription, setBusTransportDescription] = useState(
     initialSettings.busTransportDescription || "",
   );
+  const [photographyConsentEnabled, setPhotographyConsentEnabled] = useState(
+    initialSettings.photographyConsentEnabled || false,
+  );
 
   // Generate IDs on client-side only to avoid hydration mismatches
   const [isClient, setIsClient] = useState(false);
@@ -126,6 +129,7 @@ export const SettingsContent = ({ initialSettings }: SettingsContentProps) => {
         groomName,
         busTransportEnabled,
         busTransportDescription,
+        photographyConsentEnabled,
       };
 
       const response = await fetch("/api/admin/settings", {
@@ -352,6 +356,27 @@ export const SettingsContent = ({ initialSettings }: SettingsContentProps) => {
               <TextArea placeholder="" rows={3} />
             </TextField>
           )}
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Photography Consent</h3>
+
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="photographyConsentEnabled"
+              isSelected={photographyConsentEnabled}
+              onChange={setPhotographyConsentEnabled}
+            >
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+            </Checkbox>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="photographyConsentEnabled">
+                Ask photography consent question
+              </Label>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-4">
