@@ -55,6 +55,8 @@ describe("Protected Layout", () => {
         name: "Test Admin",
         image: null,
         emailVerified: true,
+        banned: false,
+        role: "admin",
         createdAt: new Date(),
         updatedAt: new Date(),
       },

@@ -17,16 +17,6 @@ export const InvitationPageClient = ({
 }: InvitationPageClientProps) => {
   const router = useRouter();
 
-  const sendVerificationCode = async () => {
-    try {
-      await fetch("/api/invitation/send-verification", {
-        method: "POST",
-      });
-    } catch (error) {
-      console.error("Error sending verification code:", error);
-    }
-  };
-
   const handleVerified = () => {
     // Refresh the page to get updated data from server
     router.refresh();
@@ -49,7 +39,6 @@ export const InvitationPageClient = ({
     return (
       <EmailVerification
         onVerified={handleVerified}
-        onResend={sendVerificationCode}
         onLogout={handleLogout}
       />
     );

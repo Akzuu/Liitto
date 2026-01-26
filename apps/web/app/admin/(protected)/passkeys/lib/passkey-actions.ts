@@ -13,7 +13,13 @@ type PasskeyResponse = {
   message?: string;
 };
 
-export const loadPasskeys = async () => {
+export type PasskeyListItem = {
+  id: string;
+  name: string | null;
+  createdAt: Date | null;
+};
+
+export const loadPasskeys = async (): Promise<PasskeyListItem[]> => {
   const session = await verifySession();
 
   const passkeys = await db

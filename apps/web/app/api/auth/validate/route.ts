@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { invitation } from "@/db/schema";
+import { createVerificationCode } from "@/lib/email-verification";
 import {
   createInvitationSession,
   getSessionCookieName,
@@ -44,6 +45,17 @@ export const POST = async (req: NextRequest) => {
 
     // Create session
     const { token, session } = await createInvitationSession(invitationData.id);
+
+    // Auto-send verification email if RSVP exists and email not verified
+    if (invitationData.rsvp && !session.emailVerified) {
+      // Fire and forget - don't block login if email send fails
+      createVerificationCode(
+        invitationData.id,
+        invitationData.rsvp.email,
+      ).catch(() => {
+        // Silently fail - login should not be blocked by email send failures
+      });
+    }
 
     // Create response
     const response = NextResponse.json({

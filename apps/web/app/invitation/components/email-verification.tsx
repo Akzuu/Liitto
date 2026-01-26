@@ -5,7 +5,6 @@ import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 type EmailVerificationProps = {
   onVerified: () => void;
-  onResend: () => Promise<void>;
   onLogout?: () => void;
 };
 
@@ -20,14 +19,15 @@ const CODE_INPUTS = [
 
 export const EmailVerification = ({
   onVerified,
-  onResend,
   onLogout,
 }: EmailVerificationProps) => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [initialSendDone, setInitialSendDone] = useState(false);
+  const [isCheckingCooldown, setIsCheckingCooldown] = useState(true);
+  const [cooldownEndsAt, setCooldownEndsAt] = useState<Date | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const inputRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
@@ -37,13 +37,57 @@ export const EmailVerification = ({
     useRef<HTMLInputElement>(null),
   ];
 
-  // Automatically send verification code on mount
+  // Countdown timer for cooldown
   useEffect(() => {
-    if (!initialSendDone) {
-      setInitialSendDone(true);
-      onResend();
-    }
-  }, [initialSendDone, onResend]);
+    if (!cooldownEndsAt) return;
+
+    // Calculate immediately to prevent flash
+    const calculateRemaining = () => {
+      const remaining = Math.ceil(
+        (cooldownEndsAt.getTime() - Date.now()) / 1000,
+      );
+      return remaining > 0 ? remaining : 0;
+    };
+
+    // Set initial value immediately
+    setCooldownSeconds(calculateRemaining());
+
+    // Then update every 100ms
+    const interval = setInterval(() => {
+      const remaining = calculateRemaining();
+
+      if (remaining <= 0) {
+        setCooldownEndsAt(null);
+        setCooldownSeconds(0);
+      } else {
+        setCooldownSeconds(remaining);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [cooldownEndsAt]);
+
+  // Check if cooldown is active on mount
+  useEffect(() => {
+    const checkCooldown = async () => {
+      setIsCheckingCooldown(true);
+      try {
+        const response = await fetch("/api/invitation/send-verification");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.cooldownActive && data.cooldownEndsAt) {
+            setCooldownEndsAt(new Date(data.cooldownEndsAt));
+          }
+        }
+      } catch {
+        // Silently fail - cooldown check is not critical
+      } finally {
+        setIsCheckingCooldown(false);
+      }
+    };
+
+    checkCooldown();
+  }, []);
 
   const handleCodeChange = (index: number, value: string) => {
     // Only allow digits
@@ -138,7 +182,32 @@ export const EmailVerification = ({
     setIsResending(true);
     setError("");
     try {
-      await onResend();
+      const response = await fetch("/api/invitation/send-verification", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        // Handle cooldown or rate limit error
+        if (data.cooldownEndsAt) {
+          setCooldownEndsAt(new Date(data.cooldownEndsAt));
+          setError(data.error);
+          return;
+        }
+        if (data.error) {
+          setError(data.error);
+          return;
+        }
+        setError("Failed to resend code. Please try again.");
+        return;
+      }
+
+      // Success - get cooldown from response
+      const data = await response.json();
+      if (data.cooldownEndsAt) {
+        setCooldownEndsAt(new Date(data.cooldownEndsAt));
+      }
+
       // Clear the code inputs
       setCode(["", "", "", "", "", ""]);
       // Focus first input
@@ -151,6 +220,14 @@ export const EmailVerification = ({
     } finally {
       setIsResending(false);
     }
+  };
+
+  const getResendButtonText = () => {
+    if (isCheckingCooldown) return "Tarkistetaan...";
+    if (isResending) return "Lähetetään...";
+    if (cooldownSeconds > 0)
+      return `Lähetä koodi uudelleen (${cooldownSeconds} s)`;
+    return "Lähetä koodi uudelleen";
   };
 
   return (
@@ -206,9 +283,12 @@ export const EmailVerification = ({
               size="md"
               className="w-full"
               onPress={handleResend}
-              isPending={isResending}
+              isPending={isCheckingCooldown || isResending}
+              isDisabled={
+                isCheckingCooldown || isResending || cooldownSeconds > 0
+              }
             >
-              {isResending ? "Lähetetään..." : "Lähetä koodi uudelleen"}
+              {getResendButtonText()}
             </Button>
 
             {onLogout && (

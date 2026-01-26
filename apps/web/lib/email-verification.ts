@@ -1,4 +1,4 @@
-import { and, eq, gte, isNull } from "drizzle-orm";
+import { and, desc, eq, gte, isNull } from "drizzle-orm";
 import { db } from "../db";
 import { emailVerificationCode } from "../db/schema";
 
@@ -6,6 +6,21 @@ const CODE_EXPIRY_MINUTES = 15;
 const MAX_ATTEMPTS = 5;
 const MAX_SENDS_PER_HOUR = 10;
 const VERIFICATION_CODE_LENGTH = 6;
+const BASE_COOLDOWN_SECONDS = 60;
+
+/**
+ * Calculate progressive cooldown based on recent send count
+ * Pattern: 60s, 90s, 120s, 180s, 240s, etc.
+ */
+const calculateCooldown = (recentSendCount: number): number => {
+  // First send: 60s, second: 90s, third: 120s, fourth: 180s, fifth: 240s
+  if (recentSendCount === 0) return 60;
+  if (recentSendCount === 1) return 90;
+  if (recentSendCount === 2) return 120;
+  if (recentSendCount === 3) return 180;
+  // After 4th send, add 60s for each additional send
+  return 180 + (recentSendCount - 3) * 60;
+};
 
 /**
  * Constant-time string comparison to prevent timing attacks
@@ -94,24 +109,58 @@ const checkRateLimit = async (invitationId: string): Promise<boolean> => {
 export const createVerificationCode = async (
   invitationId: string,
   email: string,
-): Promise<{ codeSent: boolean }> => {
-  // Check rate limiting
-  const rateLimited = await checkRateLimit(invitationId);
-  if (rateLimited) {
-    return {
-      codeSent: false,
-    };
-  }
+): Promise<{
+  codeSent: boolean;
+  reason?: "cooldown" | "rate_limit";
+  cooldownEndsAt?: Date;
+  createdAt?: Date;
+}> => {
+  // Get recent codes to calculate progressive cooldown
+  const oneHourAgo = new Date();
+  oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-  // Delete any existing unverified codes for this invitation
-  await db
-    .delete(emailVerificationCode)
+  const recentCodes = await db
+    .select()
+    .from(emailVerificationCode)
     .where(
       and(
         eq(emailVerificationCode.invitationId, invitationId),
-        isNull(emailVerificationCode.verifiedAt),
+        gte(emailVerificationCode.createdAt, oneHourAgo),
       ),
-    );
+    )
+    .orderBy(desc(emailVerificationCode.createdAt));
+
+  // Check rate limiting
+  if (recentCodes.length >= MAX_SENDS_PER_HOUR) {
+    return {
+      codeSent: false,
+      reason: "rate_limit",
+    };
+  }
+
+  // Check cooldown with progressive backoff
+  const [mostRecent] = recentCodes;
+  if (mostRecent) {
+    // Calculate cooldown based on number of recent sends
+    const cooldownSeconds = calculateCooldown(recentCodes.length - 1);
+    const secondsSinceLastSend =
+      (Date.now() - mostRecent.createdAt.getTime()) / 1000;
+    
+    if (secondsSinceLastSend < cooldownSeconds) {
+      const cooldownEndsAt = new Date(
+        mostRecent.createdAt.getTime() + cooldownSeconds * 1000,
+      );
+      return {
+        codeSent: false,
+        reason: "cooldown",
+        cooldownEndsAt,
+      };
+    }
+  }
+
+  // NOTE: We do NOT delete old unverified codes here because we need them
+  // for progressive cooldown calculation. Old codes will naturally expire
+  // and can be cleaned up by a background job if needed.
 
   // Generate and hash code
   const code = generateCode();
@@ -121,13 +170,15 @@ export const createVerificationCode = async (
   const expiresAt = new Date();
   expiresAt.setMinutes(expiresAt.getMinutes() + CODE_EXPIRY_MINUTES);
 
-  // Store in database
+  // Store in database with explicit timestamp
+  const createdAt = new Date();
   await db.insert(emailVerificationCode).values({
     invitationId,
     email,
     code: hashedCode,
     expiresAt,
     attempts: 0,
+    createdAt,
   });
 
   // TODO: Send email via email service
@@ -144,6 +195,7 @@ export const createVerificationCode = async (
 
   return {
     codeSent: true,
+    createdAt,
   };
 };
 

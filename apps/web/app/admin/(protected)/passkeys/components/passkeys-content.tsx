@@ -1,24 +1,23 @@
 "use client";
 
-import type { Passkey } from "@better-auth/passkey/client";
 import { Button, Disclosure } from "@heroui/react";
 import { Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { passkey } from "@/lib/auth-client";
 import { AdminLayout } from "../../components/admin-layout";
-import { deletePasskey } from "../lib/passkey-actions";
+import { deletePasskey, type PasskeyListItem } from "../lib/passkey-actions";
 
 type PasskeysContentProps = {
   email: string;
-  passkeys: Passkey[];
+  passkeys: PasskeyListItem[];
 };
 
 export const PasskeysContent = ({
   email,
   passkeys: initialPasskeys,
 }: PasskeysContentProps) => {
-  const [userPasskey, setUserPasskey] = useState<Passkey | null>(
-    initialPasskeys[0] ?? null
+  const [userPasskey, setUserPasskey] = useState<PasskeyListItem | null>(
+    initialPasskeys[0] ?? null,
   );
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +32,14 @@ export const PasskeysContent = ({
 
       if (result.data) {
         setSuccess("Passkey added successfully!");
-        setUserPasskey(result.data);
+        // Convert Passkey to PasskeyListItem
+        setUserPasskey({
+          id: result.data.id,
+          name: result.data.name ?? null,
+          createdAt: result.data.createdAt
+            ? new Date(result.data.createdAt)
+            : null,
+        });
       } else {
         setError("Failed to add passkey");
       }
@@ -118,7 +124,10 @@ export const PasskeysContent = ({
                 <div className="flex-1">
                   <p className="font-medium">Passkey</p>
                   <p className="text-sm text-gray-600">
-                    Added {new Date(userPasskey.createdAt).toLocaleDateString()}
+                    Added{" "}
+                    {userPasskey.createdAt
+                      ? new Date(userPasskey.createdAt).toLocaleDateString()
+                      : "Unknown date"}
                   </p>
                 </div>
                 <Button
