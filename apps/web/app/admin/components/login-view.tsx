@@ -4,6 +4,7 @@ import { Button } from "@heroui/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AlertMessage } from "@/components/alert-message";
 import { signIn } from "@/lib/auth-client";
 import { handleAsync } from "@/lib/error-handler";
 
