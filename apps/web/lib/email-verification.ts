@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, isNull } from "drizzle-orm";
 import { db } from "../db";
 import { emailVerificationCode } from "../db/schema";
+import { sendEmail } from "./email";
 
 const CODE_EXPIRY_MINUTES = 15;
 const MAX_ATTEMPTS = 5;
@@ -159,9 +160,13 @@ export const createVerificationCode = async (
     createdAt,
   });
 
-  // TODO: Send email via email service
-  // For now, log to console in development
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV === "production") {
+    await sendEmail({
+      to: email,
+      subject: "Vahvistuskoodisi",
+      text: `Vahvistuskoodisi on: ${code}\n\nKoodi on voimassa ${CODE_EXPIRY_MINUTES} minuuttia.`,
+    });
+  } else {
     console.log("=".repeat(60));
     console.log("📧 EMAIL VERIFICATION CODE");
     console.log("=".repeat(60));

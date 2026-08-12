@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
+    "vercel-build": "drizzle-kit migrate && next build",
     "start": "next start",
     "lint": "biome check --write",
     "check-types": "next typegen && tsc --noEmit",
@@ -24,6 +25,8 @@
     "@heroui/react": "3.0.0-beta.3",
     "@heroui/styles": "3.0.0-beta.3",
     "@internationalized/date": "^3.10.1",
+    "@scaleway/sdk": "^4.0.2",
+    "@scaleway/sdk-client": "^2.6.0",
     "@tailwindcss/postcss": "^4.1.18",
     "better-auth": "^1.4.12",
     "drizzle-orm": "^0.45.1",
