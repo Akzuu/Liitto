@@ -85,6 +85,13 @@
       "when": 1769445116473,
       "tag": "0011_fair_hitman",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786596349903,
+      "tag": "0012_seed_default_wedding_settings",
+      "breakpoints": true
     }
   ]
 }
