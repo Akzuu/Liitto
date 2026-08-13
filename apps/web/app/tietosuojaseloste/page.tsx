@@ -1,8 +1,6 @@
 import { Card, CardContent, CardHeader } from "@heroui/react";
-import { parseDate } from "@internationalized/date";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getWeddingSettings } from "@/lib/wedding-settings";
 
 export const metadata: Metadata = {
   title: "Tietosuojaseloste",
@@ -15,9 +13,6 @@ const CONTACT_EMAIL = "contact@kse.li";
 
 /** Date this notice was last reviewed. Update when the content changes. */
 const LAST_UPDATED = "13.8.2026";
-
-/** Guest data is erased at the latest this many months after the wedding. */
-const RETENTION_MONTHS_AFTER_WEDDING = 3;
 
 type SectionProps = {
   id: string;
@@ -66,32 +61,7 @@ const Purpose = ({ purpose, data, basis }: PurposeProps) => (
   </div>
 );
 
-/**
- * Formats the latest erasure date from the configured wedding date.
- * Returns null when no wedding date has been set in the admin settings.
- */
-const formatErasureDeadline = (weddingDate: string | null) => {
-  if (!weddingDate) {
-    return null;
-  }
-
-  try {
-    const deadline = parseDate(weddingDate).add({
-      months: RETENTION_MONTHS_AFTER_WEDDING,
-    });
-
-    return `${deadline.day}.${deadline.month}.${deadline.year}`;
-  } catch {
-    return null;
-  }
-};
-
-const PrivacyPolicyPage = async () => {
-  const weddingSettings = await getWeddingSettings();
-  const erasureDeadline = formatErasureDeadline(
-    weddingSettings?.weddingDate ?? null,
-  );
-
+const PrivacyPolicyPage = () => {
   return (
     <main className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 p-4 py-10">
       <Card className="mx-auto w-full max-w-3xl shadow-xl pt-4">
@@ -383,9 +353,8 @@ const PrivacyPolicyPage = async () => {
           <Section id="sailytys" title="11. Säilytysaika">
             <p>
               Poistamme kaikki vieraita koskevat henkilötiedot viimeistään
-              kolmen kuukauden kuluttua hääjuhlasta
-              {erasureDeadline ? `, eli viimeistään ${erasureDeadline}` : ""},
-              minkä jälkeen palvelu suljetaan. Lisäksi:
+              kuuden kuukauden kuluttua hääjuhlasta, minkä jälkeen palvelu
+              suljetaan. Lisäksi:
             </p>
             <List>
               <li>kutsuistunnot vanhenevat automaattisesti ja poistetaan</li>
