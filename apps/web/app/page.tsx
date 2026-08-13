@@ -26,6 +26,12 @@ const HomePage = async () => {
         <PinInput />
       </Card>
       <Link
+        href="/tietosuojaseloste"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+      >
+        Tietosuojaseloste
+      </Link>
+      <Link
         href="/admin"
         className="absolute bottom-4 right-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
       >

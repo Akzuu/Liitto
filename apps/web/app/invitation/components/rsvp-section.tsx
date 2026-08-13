@@ -14,6 +14,7 @@ import {
   TextArea,
   TextField,
 } from "@heroui/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { guest, rsvp, weddingSettings } from "@/db/schema";
 
@@ -287,7 +288,9 @@ export const RsvpSection = ({
                 <Label>Ruokarajoitteet</Label>
                 <TextArea rows={2} />
                 <Description>
-                  Kerro ruoka-aineallergioista tai erityisruokavalioista
+                  Kerro ruoka-aineallergioista tai erityisruokavalioista.
+                  Vapaaehtoinen — voit myös jättää kentän tyhjäksi ja kertoa
+                  asiasta meille suoraan.
                 </Description>
               </TextField>
 
@@ -362,6 +365,19 @@ export const RsvpSection = ({
             Lähetä onnentoivotuksia tai erityistoiveita morsiusparille
           </Description>
         </TextField>
+
+        {/* Privacy notice - shown before any data is submitted */}
+        <p className="text-sm text-gray-600">
+          Käsittelemme antamiasi tietoja vain hääjuhlan järjestämiseen ja
+          poistamme ne juhlan jälkeen. Lue lisää{" "}
+          <Link
+            href="/tietosuojaseloste"
+            className="font-medium text-blue-700 underline hover:text-blue-900"
+          >
+            tietosuojaselosteesta
+          </Link>
+          .
+        </p>
 
         {/* Submit button */}
         <Button
